@@ -15,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { colors, components } from "@/constants/theme";
-import { categories, condition } from "@/constants/constants";
+import { categories, condition, UVIC_LNG_LAT } from "@/constants/constants";
 import { getUserSupabase, BASE_URL } from "@/utils/functions";
 
 import LocationInput from "@/components/Inputs/LocationInput";
@@ -93,13 +93,16 @@ export default function PrefsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const bottomClearance = components.tabBar.height + insets.bottom;
-  const [latLong, setLatLong] = useState<[number, number]>([0, 0]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const { prefs, prefsLoaded, loadPrefs, savePrefs, updatePref, resetPrefs } =
     usePrefs();
+  const [latLong, setLatLong] = useState<[number, number]>([
+    prefs.defaultLat ?? UVIC_LNG_LAT[1],
+    prefs.defaultLng ?? UVIC_LNG_LAT[0],
+  ]);
 
   useEffect(() => {
     setLoading(true);
@@ -113,6 +116,7 @@ export default function PrefsScreen() {
 
   const update = <K extends keyof typeof prefs>(key: K, value: any) => {
     updatePref(key, value);
+   
     setDirty(true);
   };
 

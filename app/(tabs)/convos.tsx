@@ -5,13 +5,14 @@ import {
   ScrollView,
   Pressable,
   RefreshControl,
+  Alert,
 } from "react-native";
 import { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useConvos, useMessage } from "@/store/zustand";
-import { fetchConvos, getUserSupabase } from "@/utils/functions";
+import { useConvos, useMessage, useUser } from "@/store/zustand";
+import { deleteConvo, fetchConvos, getUserSupabase } from "@/utils/functions";
 import { getConvos } from "@/lib/conversations.lib";
 import { colors, components } from "@/constants/theme";
 import { useRefresh } from "@/hooks/useRefresh";
@@ -49,11 +50,16 @@ const ConversationsScreen = () => {
   const insets = useSafeAreaInsets();
   const bottomClearance = components.tabBar.height + insets.bottom;
 
-  const { convos, setConvos, setSelectedConvo } = useConvos();
+  const { convos, setConvos, setSelectedConvo, removeConvo } = useConvos();
   const { setError } = useMessage();
   const [loading, setLoading] = useState(true);
+  const { user, setUser } = useUser();
   const [query, setQuery] = useState("");
-  const { refreshing, onRefresh } = useRefresh({ func: fetchConvos });
+  const { refreshing, onRefresh } = useRefresh({
+    func: async () => {
+      await fetchConvos({ setter: setConvos });
+    },
+  });
   const getConvosClient = async () => {
     setLoading(true);
 
@@ -71,6 +77,7 @@ const ConversationsScreen = () => {
       setLoading(false);
     } finally {
       setLoading(false);
+      setUser({ user: data.user, app_user: data.app_user });
     }
   };
 
@@ -82,6 +89,32 @@ const ConversationsScreen = () => {
     getConvosClient();
   }, []);
 
+  const handleDelete = (cid: string) => {
+    Alert.alert(
+      "Delete conversation",
+      "This will remove the conversation from your inbox. The other person won't be notified.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const res = await deleteConvo(cid, user?.id);
+              if (res?.success) {
+                removeConvo(cid); // remove from zustand immediately
+              } else {
+                setError(true);
+              }
+            } catch (err) {
+              console.error(err);
+              setError(true);
+            }
+          },
+        },
+      ],
+    );
+  };
   const filtered = query.trim()
     ? convos?.filter((convo) => {
         const title = convo.listing?.title ?? "";
@@ -175,6 +208,7 @@ const ConversationsScreen = () => {
                   entering={FadeInDown.duration(300).delay(i * 80)}
                 >
                   <Pressable
+                    onLongPress={() => handleDelete(convo.cid)}
                     onPress={() => {
                       setSelectedConvo(convo);
                       router.push(`/convos/${convo.cid}`);

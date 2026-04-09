@@ -73,9 +73,10 @@ const ListingModal = ({ listing }: { listing: any }) => {
       setUser({ ...u, app_user });
 
       const res = await fetch(`${BASE_URL}/api/reviews/count`, {
-        headers: { Authorization: u.id },
+        headers: { Authorization: listing.lid },
       });
       const data = await res.json();
+      console.log(data)
       setLocalReviews(data.count ?? 0);
       setSelectedListing(listing);
     };
@@ -92,11 +93,21 @@ const ListingModal = ({ listing }: { listing: any }) => {
         router.replace("/sign-in");
         return;
       }
-      await createConvo({
+      const existing = listing.conversations.find(con => {
+        return con?.listingId === listing?.lid
+      })  
+      console.log(existing)
+      
+      const newCon = await createConvo({
         listingId: listing.lid,
         buyerId: data.app_user.uid,
         sellerId: listing.sellerId,
         initialMessage: message,
+      }, existing);
+      setSelectedListing({
+        ...listing,
+        conversations: [...listing.conversations, newCon],
+        buyerId: data.app_user.uid,
       });
       router.push("/convos");
     } catch (err) {
@@ -136,7 +147,7 @@ const ListingModal = ({ listing }: { listing: any }) => {
       }
       return lis;
     });
-    setUserListings(newListings)
+    setUserListings(newListings);
     setSelectedListing({});
   };
 
@@ -152,7 +163,7 @@ const ListingModal = ({ listing }: { listing: any }) => {
 
   return (
     <Modal
-      visible={!pathname.includes("new")}
+      visible={!pathname.includes("new") || !pathname.includes("convo")}
       animationType="slide"
       presentationStyle="pageSheet"
       onRequestClose={() => setSelectedListing({})}

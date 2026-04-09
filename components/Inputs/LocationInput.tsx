@@ -8,6 +8,7 @@ import {
 import { useState, useEffect, useCallback, useRef } from "react";
 import placekit, { PKResult } from "@placekit/client-js";
 import { colors } from "@/constants/theme";
+import { usePrefs } from "@/store/zustand";
 
 const API_KEY = process.env.EXPO_PUBLIC_PLACEKIT_API_KEY ?? "";
 const pk = placekit(API_KEY);
@@ -25,13 +26,12 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
     
   const [selected, setSelected] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const {prefs} = usePrefs()
   const parseCoords = useCallback((item: PKResult): [number, number] => {
     const parts = item.coordinates.split(",").map((s) => parseFloat(s.trim()));
     return [parts[0], parts[1]];
   }, []);
 
-  // ── Reverse geocode on mount ──
   useEffect(() => {
 
     if (!ll || (ll[0] !== 0 && ll[1] !== 0)) return;
@@ -39,13 +39,15 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
       try {
         const res = await pk.reverse({
           maxResults: 1,
-          coordinates: `${ll[0]},${ll[1]}`,
+          coordinates: `${prefs.defaultLat},${prefs.defaultLng}`,
           language: "en",
         });
+    
         if (res.results.length > 0) {
           const place = res.results[0];
           const label = place.name ?? place.city ?? "";
           setValue(label);
+          
           setSelected(true);
           llSetter(parseCoords(place));
           onLocationName?.(label);
@@ -58,7 +60,7 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
     reverse();
   }, []);
 
-  // ── Debounced search ──
+
   useEffect(() => {
     if (selected) return;
     if (value.length < 3) {

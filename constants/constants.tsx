@@ -1,15 +1,14 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-export const UVIC_LNG_LAT: number[] & LngLatLike = [
-  -123.312603, 48.463816,
-];
+export const UVIC_LNG_LAT: number[] & LngLatLike = [-123.312603, 48.463816];
+export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
 export const tabs = [
   {
-    name: "index",
+    name: "home",
     title: "Home",
     icon: <FontAwesome5 name="home" size={24} color="black" />,
   },

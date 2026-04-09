@@ -19,7 +19,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import * as z from "zod";
-import { categories, condition } from "@/constants/constants";
+import { categories, condition, UVIC_LNG_LAT } from "@/constants/constants";
 import { useListings, useMessage, usePrefs, useUser } from "@/store/zustand";
 import { BASE_URL, getUserSupabase } from "@/utils/functions";
 import { uploadImages } from "@/cloudinary/cloudinary";
@@ -56,9 +56,10 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
   const { prefs } = usePrefs();
   const pathname = usePathname();
   const [latLong, setLatLong] = useState<[number, number]>([
-    prefs.defaultLat ?? 0,
-    prefs.defaultLng ?? 0,
+    prefs.defaultLat ?? UVIC_LNG_LAT[1],
+    prefs.defaultLng ?? UVIC_LNG_LAT[0],
   ]);
+
   const bottomClearance = components.tabBar.height + insets.bottom;
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -87,8 +88,13 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
       setUser({ ...u, app_user });
     };
     mount();
-    const prefs = localStorage.getItem(STORAGE_KEY);
-
+    setFormData((prev) => {
+      return {
+        ...prev,
+        condition: prefs.defaultCondition ?? "",
+        category: prefs.defaultCategory ?? "",
+      };
+    });
     if (type === "edit" && selectedListing) {
       const {
         title,

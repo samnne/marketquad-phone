@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/utils/functions";
+import { BASE_URL } from "@/constants/constants";
 
 export type PreferencesPayload = {
   defaultCategory?: string | null;
@@ -10,7 +10,11 @@ export type PreferencesPayload = {
 
 export async function getPreferences(userId: string) {
   try {
-    const preferences = await fetch(`${BASE_URL}/api/account/prefs`).then(
+    const preferences = await fetch(`${BASE_URL}/api/account/prefs`, {
+      headers: {
+        Authorization: userId
+      }
+    }).then(
       (res) => res.json(),
     );
     return { success: true, preferences: preferences.preferences };

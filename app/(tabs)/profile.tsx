@@ -21,6 +21,7 @@ import ProfileSections from "@/components/ProfileSections";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useRefresh } from "@/hooks/useRefresh";
 import { TabScreenWrapper } from "@/components/TabScreenWrapper";
+import { BASE_URL } from "@/constants/constants";
 
 function getInitials(name?: string, email?: string) {
   if (name)
@@ -58,7 +59,11 @@ export default function ProfileScreen() {
       const ulst = await getUserListings(u.id);
       setUserListings(ulst.listings);
 
-      const prefs = await getPreferences(u.id!);
+      const res = await fetch(`${BASE_URL}/api/reviews/count`, {
+        headers: { Authorization: u.id },
+      });
+      const data = await res.json();
+      setUser({ ...user, app_user: {...app_user, rating: data?.rating} });
     },
   });
 
@@ -247,7 +252,6 @@ export default function ProfileScreen() {
               Settings
             </Text>
             <View className="bg-pill rounded-[20px] border border-primary/25 overflow-hidden">
-            
               <ProfileSections
                 sideIcon={
                   <FontAwesome

@@ -1,7 +1,8 @@
-
+import { BASE_URL } from "@/constants/constants";
+import { safeJson } from "@/lib/listing.lib";
 import { supabase } from "@/supabase/authHelper";
 
-export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
+
 export const cloudinaryLoader = ({ src, width, quality }: ImageLoaderProps) => {
   const transforms = `c_fill,w_${width},q_${quality ?? 75},f_auto`;
   return src.replace("/upload/", `/upload/${transforms}/`);
@@ -42,7 +43,7 @@ export async function fetchConvos({ setter }: { setter: Function }) {
 
 export const fetchListings = async ({ setter }: { setter: Function }) => {
   const user = await getUserSupabase();
- 
+
   if (!user) {
     const temp = await fetch(`${BASE_URL}/api/listings`).then((res) =>
       res.json(),
@@ -52,9 +53,9 @@ export const fetchListings = async ({ setter }: { setter: Function }) => {
   } else {
     const temp = await fetch(`${BASE_URL}/api/listings`, {
       method: "get",
-      headers: { Authorization: user.user?.id ? user.user.id : ""},
+      headers: { Authorization: user.user?.id ? user.user.id : "" },
     }).then((res) => res.json());
-  
+
     setter(temp?.listings);
 
     return temp;
@@ -74,3 +75,15 @@ export async function getUserSupabase() {
   const supa_user = data.user;
   return { user: supa_user, app_user: user.data };
 }
+
+
+export const deleteConvo = async (cid: string, userId: string) => {
+  const response = await fetch(`${BASE_URL}/api/conversations/${cid}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: userId,
+    },
+  });
+  console.log(await response.json())
+  return safeJson(response);
+};

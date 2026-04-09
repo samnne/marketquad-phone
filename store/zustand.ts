@@ -86,23 +86,27 @@ export const useTabStore = create<{
   tabIndex: 0,
   setTabIndex: (tabIndex) => set({ tabIndex }),
 }));
-export type ConvosState = {
-  convos: (Conversation & ConversationInclude)[] | null;
-  setConvos: Function;
+// store/zustand.ts — inside useConvos
+type ConvosState = {
+  convos: Conversation[];
   selectedConvo: Conversation | null;
-  setSelectedConvo: Function;
-  reset: Function;
+  setConvos: (convos: Conversation[]) => void;
+  setSelectedConvo: (convo: Conversation) => void;
+  removeConvo: (cid: string) => void; // ← add this
+  reset: () => void;
 };
-export const useConvos: UseBoundStore<StoreApi<ConvosState>> = create((set) => {
-  return {
-    convos: null,
-    selectedConvo: null,
-    setSelectedConvo: (convo: Conversation) => set({ selectedConvo: convo }),
-    setConvos: (convos: (Conversation & ConversationInclude)[]) =>
-      set({ convos: convos }),
-    reset: () => set({ convos: null, selectedConvo: null }),
-  };
-});
+
+export const useConvos = create<ConvosState>((set) => ({
+  convos: [],
+  selectedConvo: null,
+  setConvos: (convos) => set({ convos }),
+  setSelectedConvo: (convo) => set({ selectedConvo: convo }),
+  removeConvo: (cid) =>
+    set((state) => ({
+      convos: state.convos.filter((c) => c.cid !== cid),
+    })),
+  reset: () => set({ convos: [], selectedConvo: null }),
+}));
 export interface ReviewModalState {
   reviewModal: boolean;
   setReviewModal: Function;
@@ -126,40 +130,36 @@ export const useReviewModal: UseBoundStore<StoreApi<ReviewModalState>> = create(
   },
 );
 
-
-
 type Prefs = {
-  defaultCategory:  string | null;
+  defaultCategory: string | null;
   defaultCondition: string | null;
-  defaultLocation:  string | null;
-  defaultLat:       number | null;
-  defaultLng:       number | null;
+  defaultLocation: string | null;
+  defaultLat: number | null;
+  defaultLng: number | null;
 };
 
 type PrefsState = {
-  prefs:       Prefs;
+  prefs: Prefs;
   prefsLoaded: boolean;
 
-
-  setPrefs:    (prefs: Partial<Prefs>) => void;
-  loadPrefs:   () => void;
-  savePrefs:   () => void;
-  resetPrefs:  () => void;
-  updatePref:  <K extends keyof Prefs>(key: K, value: Prefs[K]) => void;
+  setPrefs: (prefs: Partial<Prefs>) => void;
+  loadPrefs: () => void;
+  savePrefs: () => void;
+  resetPrefs: () => void;
+  updatePref: <K extends keyof Prefs>(key: K, value: Prefs[K]) => void;
 };
 
 const DEFAULT_PREFS: Prefs = {
-  defaultCategory:  null,
+  defaultCategory: null,
   defaultCondition: null,
-  defaultLocation:  null,
-  defaultLat:       null,
-  defaultLng:       null,
+  defaultLocation: null,
+  defaultLat: null,
+  defaultLng: null,
 };
 
 export const usePrefs = create<PrefsState>((set, get) => ({
-  prefs:       DEFAULT_PREFS,
+  prefs: DEFAULT_PREFS,
   prefsLoaded: false,
-
 
   loadPrefs: () => {
     try {
@@ -176,7 +176,6 @@ export const usePrefs = create<PrefsState>((set, get) => ({
     }
   },
 
- 
   savePrefs: () => {
     try {
       const { prefs } = get();
@@ -186,13 +185,11 @@ export const usePrefs = create<PrefsState>((set, get) => ({
     }
   },
 
- 
   setPrefs: (incoming) => {
     set((state) => ({
       prefs: { ...state.prefs, ...incoming },
     }));
   },
-
 
   updatePref: (key, value) => {
     set((state) => ({

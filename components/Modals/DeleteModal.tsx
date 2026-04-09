@@ -43,7 +43,7 @@ const DeleteModal = ({
         activeOpacity={1}
         onPress={closeModal}
         className="flex-1 bg-black/50 items-center justify-center px-6"
-      >
+      >stop press from bubbling to backdrop 
         {/* Modal Card */}
         <TouchableOpacity
           activeOpacity={1}

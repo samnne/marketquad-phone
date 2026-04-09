@@ -1,5 +1,6 @@
 
-import { BASE_URL, getUserSupabase } from "@/utils/functions";
+import { BASE_URL } from "@/constants/constants";
+import {  getUserSupabase } from "@/utils/functions";
 
 interface NewMessageProps {
   conversationId: string;

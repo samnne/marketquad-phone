@@ -1,19 +1,25 @@
-import { View, Image } from "react-native";
-import React, { ReactNode } from "react";
-import { Tabs } from "expo-router";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { HapticTab } from "@/components/HapticTab";
 import { tabs } from "@/constants/constants";
-import { TabIconProps } from "@/type";
-import { StatusBar } from "expo-status-bar";
 import { colors, components } from "@/constants/theme";
 import { TAB_ORDER } from "@/hooks/useTabDirection";
-import { useTabStore } from "@/store/zustand";
-import { HapticTab } from "@/components/HapticTab";
+import { usePrefs, useTabStore } from "@/store/zustand";
+import { TabIconProps } from "@/type";
+import { Tabs } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import React, { ReactNode, useEffect } from "react";
+import { View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const TabsLayout = () => {
   const insets = useSafeAreaInsets();
   const tabBar = components.tabBar;
   const { setTabIndex } = useTabStore();
+  const { loadPrefs } = usePrefs();
+
+  useEffect(() => {
+    loadPrefs();
+  }, []);
+
   function TabIcon({ focused, icon }: TabIconProps): ReactNode {
     return (
       <View className=" size-14 items-center justify-center">
@@ -60,7 +66,7 @@ const TabsLayout = () => {
         tabPress: (e) => {
           const route = e.target?.split("-")[0]; // expo-router target format
           const index = TAB_ORDER.findIndex(
-            (t) => t === `/${route}` || (route === "index" && t === "/"),
+            (t) => t === `/${route}` || (route === "home" && t === "/home"),
           );
           if (index !== -1) setTabIndex(index);
         },

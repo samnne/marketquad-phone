@@ -1,4 +1,5 @@
-import { BASE_URL } from "@/utils/functions";
+import { BASE_URL } from "@/constants/constants";
+
 import plimit from "p-limit";
 export async function getCloudinarySignature() {
   const res = await fetch(`${BASE_URL}/api/cloudinary`);

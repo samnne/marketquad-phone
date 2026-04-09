@@ -19,12 +19,13 @@ import Animated, {
 import clsx from "clsx";
 import { supabase } from "@/supabase/authHelper";
 import { signUpUser } from "@/supabase/supabase";
-import { BASE_URL, getUserSupabase, matchUVIC } from "@/utils/functions";
+import { getUserSupabase, matchUVIC } from "@/utils/functions";
 import { useMessage, useType, useUser } from "@/store/zustand";
 
 import { colors } from "@/constants/theme";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { BASE_URL } from "@/constants/constants";
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 

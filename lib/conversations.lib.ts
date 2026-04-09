@@ -1,4 +1,5 @@
-import { BASE_URL, getUserSupabase } from "@/utils/functions";
+import { BASE_URL } from "@/constants/constants";
+import { getUserSupabase } from "@/utils/functions";
 
 interface NewConvo {
   listingId: string;
@@ -15,28 +16,32 @@ export async function getConvo(cid: string) {
     headers: {
       Authorization: user?.id,
     },
-    method: "GET"
- 
+    method: "GET",
   }).then((res) => res.json());
 
   if (!response) return false;
   return response.convo;
 }
 
-export async function createConvo({
-  listingId,
-  buyerId,
-  sellerId,
-  initialMessage,
-}: NewConvo) {
+export async function createConvo(
+  { listingId, buyerId, sellerId, initialMessage }: NewConvo,
+  existing = null,
+) {
+
   const convo = await fetch(`${BASE_URL}/api/conversations`, {
     headers: {
       Authorization: buyerId,
     },
-    body: JSON.stringify({ listingId, buyerId, sellerId, initialMessage }),
+    body: JSON.stringify({
+      listingId,
+      buyerId,
+      sellerId,
+      initialMessage,
+      existing,
+    }),
     method: "POST",
   }).then((res) => res.json());
-
+ 
   return convo;
 }
 

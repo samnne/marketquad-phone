@@ -1,4 +1,4 @@
-import { BASE_URL } from "@/utils/functions";
+import { BASE_URL } from "@/constants/constants";
 
 export const safeJson = async (response: Response) => {
   if (!response.ok) {

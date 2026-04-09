@@ -12,12 +12,13 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useListings, useMessage } from "@/store/zustand";
-import { BASE_URL, fetchListings, getUserSupabase } from "@/utils/functions";
+import { fetchListings, getUserSupabase } from "@/utils/functions";
 import { colors } from "@/constants/theme";
 import ListingCard from "@/components/ListingCard";
 import { useRefresh } from "@/hooks/useRefresh";
 import ListingModal from "@/components/ListingModal";
 import { TabScreenWrapper } from "@/components/TabScreenWrapper";
+import { BASE_URL } from "@/constants/constants";
 
 const CATEGORIES = [
   "All",

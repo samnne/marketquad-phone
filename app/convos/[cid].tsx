@@ -8,11 +8,17 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { SafeAreaView as RNSAV } from "react-native-safe-area-context";
 import { styled } from "nativewind";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  FontAwesome,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import {
   useConvos,
   useListings,
@@ -23,7 +29,9 @@ import {
 import { socket } from "@/socketio/socket";
 import { getUserSupabase } from "@/utils/functions";
 import { getMessagesForConvo, sendMessage } from "@/lib/messages.lib";
-import { getConvo } from "@/lib/conversations.lib";
+import { createConvo, getConvo } from "@/lib/conversations.lib";
+import ConvoInfoModal from "@/components/Modals/ConvoInfoModal";
+import ReviewModal from "@/components/Modals/ReviewModal";
 
 const SafeAreaView = styled(RNSAV);
 const StyledText = styled(Text);
@@ -59,14 +67,24 @@ const CID = () => {
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState("");
+
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [typing, setTyping] = useState(false);
 
   const { selectedConvo, setSelectedConvo } = useConvos();
-  const { setReviewModal } = useReviewModal();
+  const { setReviewModal, reviewModal } = useReviewModal();
   const { setError } = useMessage();
   const { user, setUser } = useUser();
   const { setSelectedListing } = useListings();
+  const [infoModal, setInfoModal] = useState(false);
+
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { removeConvo } = useConvos();
+  const isBuyer = selectedConvo?.buyerId === user?.id;
+  const isSeller = selectedConvo?.sellerId === user?.id;
+  const otherUser = isBuyer ? selectedConvo?.seller : selectedConvo?.buyer;
 
   const [messageError, setMessageError] = useState<{
     success?: boolean;
@@ -110,7 +128,7 @@ const CID = () => {
     const convo = await getConvo(params.cid as string);
     if (!convo) {
       setError(true);
-      console.log(convo);
+   
       router.back();
       return;
     }
@@ -155,7 +173,25 @@ const CID = () => {
       cid: params.cid,
       message: { senderId: user.id, text: tempText },
     });
+    const isNullBuyerOrSeller =
+      !selectedConvo?.buyerId || !selectedConvo?.sellerId;
+    const otherId = messages.find(
+      (msg) => msg?.buyerId !== user.id || msg?.sellerId !== user.id,
+    );
 
+    if (isNullBuyerOrSeller) {
+      const newCon = await createConvo(
+        {
+          listingId: selectedConvo?.listingId,
+          buyerId: isBuyer ? user.id : otherId.senderId,
+          initialMessage: tempText,
+          sellerId: isSeller ? user.id : otherId.senderId,
+        },
+        selectedConvo,
+      );
+      setSelectedConvo(newCon?.convo);
+  
+    }
     const response = await sendMessage(
       {
         conversationId: params.cid as string,
@@ -177,7 +213,7 @@ const CID = () => {
   // --- Render Helpers ---
 
   const renderMessage = ({ item, index }: { item: Message; index: number }) => {
-    const isMine = item.senderId === user?.id;
+    const isMine = item?.senderId === user?.id;
 
     const prevMsg = messages[index - 1];
     const showDivider =
@@ -188,8 +224,8 @@ const CID = () => {
 
     const hasError =
       !messageError?.success && item.text === messageError?.message_text;
-    const seller = selectedConvo.seller;
-    const buyer = selectedConvo.buyer;
+    const seller = selectedConvo?.seller;
+    const buyer = selectedConvo?.buyer;
     const curUser =
       buyer?.uid === user.id
         ? buyer
@@ -268,13 +304,13 @@ const CID = () => {
                 className={`w-2 h-2 rounded-full mr-1 ${isConnected ? "bg-green-500" : "bg-gray-300"}`}
               />
               <Text className="text-[11px] text-gray-500">
-                {isConnected ? "Connected" : "Offline"} 
+                {isConnected ? "Connected" : "Offline"}
               </Text>
             </View>
           </View>
         </View>
         <TouchableOpacity
-          onPress={() => setReviewModal(true)}
+          onPress={() => setInfoModal(true)}
           className="p-2 bg-gray-50 rounded-xl"
         >
           <Ionicons
@@ -283,6 +319,26 @@ const CID = () => {
             color="#6b9e8a"
           />
         </TouchableOpacity>
+        <ConvoInfoModal
+          visible={infoModal}
+          onClose={() => setInfoModal(false)}
+          onOpenReview={() => {
+            setInfoModal(false);
+            setReviewModal(true);
+          }}
+          cid={params.cid as string}
+          listing={listing}
+          otherUser={otherUser}
+          isBuyer={isBuyer}
+        />
+
+        <ReviewModal
+          visible={reviewModal}
+          onClose={() => setReviewModal(false)}
+          otherUser={otherUser}
+          isBuyer={isBuyer}
+          role={isBuyer ? "BUYER" : "SELLER"}
+        />
       </View>
 
       {/* Listing Pill */}
@@ -317,7 +373,6 @@ const CID = () => {
         onContentSizeChange={() =>
           flatListRef.current?.scrollToEnd({ animated: true })
         }
-      
         ListFooterComponent={
           typing ? (
             <View className="bg-gray-100 rounded-full px-4 py-2 w-16 items-center mt-2">
@@ -331,7 +386,6 @@ const CID = () => {
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 10 : 0}
-        
       >
         <View className="p-3  border-t border-gray-100 flex-row items-end bg-white">
           <TouchableOpacity className="w-10 h-10 bg-gray-50 rounded-xl items-center justify-center mr-2">
