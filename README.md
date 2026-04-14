@@ -1,50 +1,104 @@
-# Welcome to your Expo app 👋
+# 📦 MarketQuad
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**MarketQuad** is a modern student-focused marketplace platform that enables users to buy, sell, and connect within their campus community. Built with a full-stack architecture, it emphasizes simplicity, trust, and seamless user experience.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Features
 
-   ```bash
-   npm install
-   ```
+- 🔍 Smart listing creation and filtering  
+- 💬 Real-time messaging between users  
+- 👤 User authentication and profile management  
+- ⭐ Ratings and review system  
+- 🧠 Personalized recommendations  
 
-2. Start the app
 
-   ```bash
-   npx expo start
-   ```
+---
 
-In the output, you'll find options to open the app in a
+## 🛠️ Tech Stack
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+**Frontend**
+- React Native
+- Tailwind CSS / NativeWind
+- Expo 
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+**Backend**
+- Next.js
+- SocketIO
+ 
 
-## Get a fresh project
+**Database**
+- Supabase  
+- Prisma ORM  
 
-When you're ready, run:
+**State Management**
+- Zustand  
+
+**Other Tools**
+- REST APIs   
+- Cloudinary (image uploads)  
+
+---
+
+## 📂 Project Structure
 
 ```bash
-npm run reset-project
+marketquad/
+│── app/                
+│── assets/         
+│── cloudinary/                
+│── components/              
+│── db/             
+│── hooks/             
+│── lib/      
+│── socketio/      
+│── store/      
+│── supabase/
+│── utils/             
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
 
-To learn more about developing your project with Expo, look at the following resources:
+---
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## 🔐 Authentication
 
-## Join the community
+MarketQuad uses secure authentication strategies (JWT / session-based) to protect user data and ensure safe interactions between users.
 
-Join our community of developers creating universal apps.
+---
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## 📸 Screenshots
+
+![market](https://github.com/user-attachments/assets/abca3c68-9502-4339-a45b-de2a82a2d0e8)![convos](https://github.com/user-attachments/assets/19aa52a9-0359-452a-b361-3a03827ae96b)
+![marketquad](https://github.com/user-attachments/assets/f3528769-62fe-4ff2-9473-de930288ab27)
+![profile](https://github.com/user-attachments/assets/bd7f4189-4880-4509-bbb7-ad70d56f8f69)
+![new](https://github.com/user-attachments/assets/20880ce1-f610-4c49-ae8b-5a141135d179)
+![home_page](https://github.com/user-attachments/assets/ab09884f-7586-4138-9430-d948ba95df3b)
+
+
+## 🌱 Future Improvements
+
+- 🔔 Notifications system  
+- 🧠 Improved recommendation algorithms  
+- 📊 Analytics dashboard  
+
+
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+Built by students, for students.
+
+[FOLLOW US ON INSTAGRAM](https://www.instagram.com/market_quad/)
+
+---
+
+## ⭐ Support
+
+If you like this project, give it a star ⭐ and share it with others!
