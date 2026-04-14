@@ -1,19 +1,46 @@
 import { BASE_URL } from "@/constants/constants";
 
 import plimit from "p-limit";
-export async function getCloudinarySignature() {
-  const res = await fetch(`${BASE_URL}/api/cloudinary`);
+export async function getCloudinarySignature(uid) {
+  const res = await fetch(`${BASE_URL}/api/cloudinary`, {
+    headers: {
+      Authorization: uid,
+    },
+  });
+
   return await res.json();
 }
+
 const limit = plimit(10);
 
-export async function uploadImage(uri: string): Promise<string> {
-  // Get signature from your backend
+export async function uploadImages(
+  images: string[],
+  uid: string,
+): Promise<string[]> {
   const { timestamp, signature, cloudName, apiKey } =
-    await getCloudinarySignature();
-  console.log(timestamp, signature, cloudName);
+    await getCloudinarySignature(uid);
 
-  // Build form data
+  const imagesToUpload = images.map((image) =>
+    limit(() =>
+      uploadImage(image, { timestamp, signature, cloudName, apiKey }),
+    ),
+  );
+
+  return Promise.all(imagesToUpload);
+}
+
+export async function uploadImage(
+  uri: string,
+  credentials?: {
+    timestamp: string;
+    signature: string;
+    cloudName: string;
+    apiKey: string;
+  },
+): Promise<string> {
+  const { timestamp, signature, cloudName, apiKey } =
+    credentials ?? (await getCloudinarySignature(uid));
+
   const formData = new FormData();
   formData.append("file", {
     uri,
@@ -33,29 +60,9 @@ export async function uploadImage(uri: string): Promise<string> {
   const data = await uploadRes.json();
 
   if (!data.secure_url) {
-    console.error("Cloudinary upload failed:", data);
+    console.error("Cloudinary upload failed:", JSON.stringify(data));
     throw new Error(data.error?.message ?? "Upload failed");
   }
 
   return data.secure_url;
-}
-
-export async function uploadImages(images: string[]): Promise<string[]> {
-  const imagesToUpload = images.map(async (image) => {
-    return limit(async () => {
-      return await uploadImage(image);
-      // const buffer = Buffer.from(await image.arrayBuffer());
-
-      // return new Promise<string>((resolve, rej) => {
-      //   cloudinary.uploader
-      //     .upload_stream({ folder: "/uploads" }, (error, res) => {
-      //       if (error || !res) return rej(error);
-      //       resolve(res.secure_url);
-      //     })
-      //     .end(buffer);
-      // });
-    });
-  });
-
-  return Promise.all(imagesToUpload);
 }

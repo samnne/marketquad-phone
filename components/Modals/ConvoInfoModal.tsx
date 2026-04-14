@@ -5,6 +5,9 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { colors } from "@/constants/theme";
 import { deleteConvo } from "@/utils/functions";
 import { useConvos, useMessage, useUser } from "@/store/zustand";
+import { useRef, useState } from "react";
+import { ReportUserSheet } from "../ReportUserSheet";
+import BottomSheet from "@gorhom/bottom-sheet";
 
 type Props = {
   visible: boolean;
@@ -29,7 +32,9 @@ const ConvoInfoModal = ({
   const { removeConvo } = useConvos();
   const { setError } = useMessage();
   const { user } = useUser();
-  
+  const [reportModal, setReportModal] = useState(false);
+  const ref = useRef<BottomSheet>(null);
+
   const handleDelete = () => {
     Alert.alert(
       "Delete conversation",
@@ -43,8 +48,7 @@ const ConvoInfoModal = ({
             try {
               const res = await deleteConvo(cid, user.id);
               if (res?.success) {
-                console.log(res)
-                // removeConvo(cid);
+                removeConvo(cid);
                 onClose();
                 router.replace("/convos");
               } else {
@@ -59,6 +63,10 @@ const ConvoInfoModal = ({
       ],
     );
   };
+
+  function openReportModal(val: boolean) {
+    setReportModal(val);
+  }
 
   return (
     <Modal
@@ -160,6 +168,27 @@ const ConvoInfoModal = ({
                 color={colors.secondary}
               />
             </Pressable>
+            <Pressable
+              onPress={() => openReportModal(true)}
+              className="flex-row items-center gap-3 px-4 py-3.5 border-b border-secondary/15 active:bg-secondary/10"
+            >
+              <View className="w-9 h-9 rounded-[10px] bg-secondary/20 items-center justify-center">
+                <FontAwesome name="flag-o" size={15} color={colors.accent} />
+              </View>
+              <View className="flex-1">
+                <Text className="text-[14px] font-medium text-text">
+                  Did something go wrong?
+                </Text>
+                <Text className="text-[11px] text-secondary">
+                  Make a report, and we will investigate the issue.
+                </Text>
+              </View>
+              <FontAwesome
+                name="chevron-right"
+                size={12}
+                color={colors.secondary}
+              />
+            </Pressable>
 
             {/* Delete */}
             <Pressable
@@ -181,6 +210,14 @@ const ConvoInfoModal = ({
           </View>
         </ScrollView>
       </View>
+      {reportModal && (
+        <ReportUserSheet
+          targetName={otherUser?.name?.split(" ")[0]!}
+          targetUserId={otherUser?.uid!}
+          onClose={() => openReportModal(false)}
+          bottomSheetRef={ref}
+        />
+      )}
     </Modal>
   );
 };

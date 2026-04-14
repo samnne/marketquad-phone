@@ -1,22 +1,19 @@
-import { db, STORAGE_KEY } from "@/db/db";
+import { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  Pressable,
-  Switch,
   ActivityIndicator,
   Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
-import { useState, useEffect } from "react";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { colors, components } from "@/constants/theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
 import { categories, condition, UVIC_LNG_LAT } from "@/constants/constants";
-import { getUserSupabase, BASE_URL } from "@/utils/functions";
+import { colors, components } from "@/constants/theme";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useRouter } from "expo-router";
 
 import LocationInput from "@/components/Inputs/LocationInput";
 import { usePrefs } from "@/store/zustand";
@@ -116,7 +113,7 @@ export default function PrefsScreen() {
 
   const update = <K extends keyof typeof prefs>(key: K, value: any) => {
     updatePref(key, value);
-   
+
     setDirty(true);
   };
 
@@ -272,7 +269,11 @@ export default function PrefsScreen() {
               <LocationInput
                 llSetter={setLatLong}
                 ll={latLong}
-                onLocationName={(name) => update("defaultLocation", name)}
+                onLocationName={(name) => {
+                  update("defaultLat", latLong[0]);
+                  update("defaultLng", latLong[1]);
+                  update("defaultLocation", name);
+                }}
               />
             </Animated.View>
           </Section>

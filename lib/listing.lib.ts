@@ -55,6 +55,9 @@ export const newListingAction = async (
 ) => {
   const response = await fetch(`${BASE_URL}/api/listings`, {
     method: "POST",
+    headers: {
+      Authorization: sellerId,
+    },
     body: JSON.stringify({ ...newListing, sellerId }),
   });
 

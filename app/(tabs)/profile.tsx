@@ -62,6 +62,7 @@ export default function ProfileScreen() {
         headers: { Authorization: u.id },
       });
       const data = await res.json();
+    
       setUser({ ...user, app_user: { ...app_user, rating: data?.rating } });
       return;
     },

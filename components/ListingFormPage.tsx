@@ -1,39 +1,42 @@
+import { uploadImages } from "@/cloudinary/cloudinary";
 import {
-  View,
+  BASE_URL,
+  categories,
+  condition,
+  UVIC_LNG_LAT,
+} from "@/constants/constants";
+import { editListingAction, newListingAction } from "@/lib/listing.lib";
+import { useListings, useMessage, usePrefs, useUser } from "@/store/zustand";
+import { getUserSupabase } from "@/utils/functions";
+import * as FileSystem from "expo-file-system";
+import * as ImagePicker from "expo-image-picker";
+import { usePathname, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
-  ScrollView,
-  Pressable,
-  Image,
-  ActivityIndicator,
-  StyleSheet,
-  Alert,
+  View,
 } from "react-native";
-import { useState, useEffect } from "react";
-import { usePathname, useRouter } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
 import Animated, {
   FadeInDown,
-  useSharedValue,
   useAnimatedStyle,
+  useSharedValue,
   withSpring,
 } from "react-native-reanimated";
 import * as z from "zod";
-import { categories, condition, UVIC_LNG_LAT } from "@/constants/constants";
-import { useListings, useMessage, usePrefs, useUser } from "@/store/zustand";
-import { BASE_URL, getUserSupabase } from "@/utils/functions";
-import { uploadImages } from "@/cloudinary/cloudinary";
-import { newListingAction, editListingAction } from "@/lib/listing.lib";
 
 import { colors, components } from "@/constants/theme";
 
+import { styled } from "nativewind";
 import {
   SafeAreaView as RNSAV,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { styled } from "nativewind";
 import LocationInput from "./Inputs/LocationInput";
-import { STORAGE_KEY } from "@/db/db";
 const SafeAreaView = styled(RNSAV);
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
@@ -169,7 +172,15 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
         .map((img) => img.uri);
 
       setUploading(true);
-      const uploadedUrls = await uploadImages(localImages.map((i) => i.uri));
+      const uploadedUrls = await uploadImages(
+        localImages.map((i) => i.uri),
+        user.id,
+      );
+      await Promise.allSettled(
+        localImages.map(({ uri }) =>
+          FileSystem.deleteAsync(uri, { idempotent: true }),
+        ),
+      );
       setUploading(false);
 
       const allImageUrls = [...remoteUrls, ...uploadedUrls];
@@ -184,6 +195,8 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             imageUrls: allImageUrls,
             sellerId: user.id,
             category: formData.category,
+            latitude: latLong[0],
+            longitude: latLong[1],
           },
           user.id,
         );
@@ -220,6 +233,8 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             imageUrls: allImageUrls,
             sellerId: user.id,
             category: formData.category,
+            latitude: latLong[0],
+            longitude: latLong[1],
           },
           user.id,
         );
@@ -237,6 +252,16 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
       console.error(err);
       setError(true);
     } finally {
+      setFormData({
+        title: "",
+        price: "0",
+        description: "",
+        condition: prefs.defaultCondition ?? "",
+        category: prefs.defaultCategory ?? "",
+        defaultLocation: prefs.defaultLocation ?? "",
+      });
+      setLatLong([prefs.defaultLat ?? 0, prefs.defaultLng ?? 0]);
+
       setIsLoading(false);
       setUploading(false);
     }

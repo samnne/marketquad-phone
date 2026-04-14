@@ -1,10 +1,11 @@
 import Carousel from "@/components/Carousel";
 import StarRating from "@/components/StarRating";
+import { BASE_URL } from "@/constants/constants";
 import { colors } from "@/constants/theme";
 import { createConvo } from "@/lib/conversations.lib";
 import { deleteListingAction } from "@/lib/listing.lib";
 import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
-import { BASE_URL, getUserSupabase } from "@/utils/functions";
+import { getUserSupabase } from "@/utils/functions";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -15,13 +16,13 @@ import {
   ScrollView,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import Animated, {
   FadeInDown,
   useAnimatedStyle,
   useSharedValue,
-  withSpring
+  withSpring,
 } from "react-native-reanimated";
 import LocationPreview from "./ListingMap";
 
@@ -69,12 +70,11 @@ const ListingModal = ({ listing }: { listing: any }) => {
       const { user: u, app_user } = await getUserSupabase();
       if (!u) return;
       setUser({ ...u, app_user });
-
       const res = await fetch(`${BASE_URL}/api/reviews/count`, {
-        headers: { Authorization: listing.lid },
+        headers: { Authorization: u.id },
       });
+
       const data = await res.json();
-      console.log(data);
       setLocalReviews(data.count ?? 0);
       setSelectedListing(listing);
     };

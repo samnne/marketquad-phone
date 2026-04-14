@@ -1,14 +1,14 @@
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ActivityIndicator,
-} from "react-native";
-import { useState, useEffect, useCallback, useRef } from "react";
-import placekit, { PKResult } from "@placekit/client-js";
 import { colors } from "@/constants/theme";
 import { usePrefs } from "@/store/zustand";
+import placekit, { PKResult } from "@placekit/client-js";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ActivityIndicator,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 const API_KEY = process.env.EXPO_PUBLIC_PLACEKIT_API_KEY ?? "";
 const pk = placekit(API_KEY);
@@ -23,17 +23,16 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
   const [value, setValue] = useState("");
   const [results, setResults] = useState<PKResult[]>([]);
   const [loading, setLoading] = useState(false);
-    
+
   const [selected, setSelected] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const {prefs} = usePrefs()
+  const { prefs } = usePrefs();
   const parseCoords = useCallback((item: PKResult): [number, number] => {
     const parts = item.coordinates.split(",").map((s) => parseFloat(s.trim()));
     return [parts[0], parts[1]];
   }, []);
 
   useEffect(() => {
-
     if (!ll || (ll[0] !== 0 && ll[1] !== 0)) return;
     const reverse = async () => {
       try {
@@ -42,24 +41,22 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
           coordinates: `${prefs.defaultLat},${prefs.defaultLng}`,
           language: "en",
         });
-    
+
         if (res.results.length > 0) {
           const place = res.results[0];
           const label = place.name ?? place.city ?? "";
           setValue(label);
-          
+
           setSelected(true);
           llSetter(parseCoords(place));
           onLocationName?.(label);
         }
-   
       } catch (err) {
         console.error("Reverse geocode error:", err);
       }
     };
     reverse();
   }, []);
-
 
   useEffect(() => {
     if (selected) return;
@@ -119,7 +116,6 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
-          
         />
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
