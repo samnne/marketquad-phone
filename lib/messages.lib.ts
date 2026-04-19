@@ -33,7 +33,7 @@ export async function sendMessage(newMessage: NewMessageProps, user: User) {
         message_text: newMessage.text,
       };
     }
-    console.log(message)
+   
     return {
       success: true,
       message: "Message Sent",

@@ -83,7 +83,7 @@ const Index = () => {
 
   const val = db.getItem(ONBOARDING_KEY);
   if (val === ONBOARDING_VALUE) {
-    return <Redirect href={"/(auth)/sign-in"} />;
+    return <Redirect href={"/home"} />;
   }
 
   const nextStep = () => {
@@ -203,6 +203,42 @@ const Index = () => {
           />
         ))}
       </View>
+      <AnimatePresence exitBeforeEnter>
+      {currentStep > 0 && (
+          <View
+            from={{
+              opacity: 0,
+              translateY: 10,
+              translateX: 25,
+            }}
+            animate={{
+              opacity: 1,
+              translateX: 0,
+              translateY: 0,
+                
+            }}
+            exit={{
+              opacity: 0,
+              translateY: 10,
+              translateX: 25,
+            }}
+            className="absolute right-10 top-20 "
+            transition={{
+              type: "spring",
+              damping: 60,
+          
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/sign-in")}
+              activeOpacity={0.9}
+              className="flex-row   justify-center mt-4 items-center"
+            >
+              <Text className="text-sm text-gray-400 p-1">Skip</Text>
+            </TouchableOpacity>
+          </View>
+      )}
+        </AnimatePresence>
     </SafeAreaView>
   );
 };

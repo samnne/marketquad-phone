@@ -38,12 +38,14 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
       try {
         const res = await pk.reverse({
           maxResults: 1,
-          coordinates: `${prefs.defaultLat},${prefs.defaultLng}`,
+          coordinates: `${prefs.defaultLat ?? ll[0]},${prefs.defaultLng ?? ll[1]}`,
           language: "en",
         });
+        
 
         if (res.results.length > 0) {
           const place = res.results[0];
+          
           const label = place.name ?? place.city ?? "";
           setValue(label);
 
@@ -56,7 +58,7 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
       }
     };
     reverse();
-  }, []);
+  }, [ll, llSetter, onLocationName,parseCoords, prefs.defaultLat, prefs.defaultLng]);
 
   useEffect(() => {
     if (selected) return;
@@ -105,14 +107,14 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
       {/* ── Input ── */}
       <View className="flex-row  items-center bg-pill border border-primary/40 rounded-xl px-3.5 py-2.5 gap-2">
         <TextInput
-          className="flex-1 text-sm  text-text"
+    
           value={value}
           onChangeText={(v) => {
             setValue(v);
             setSelected(false);
           }}
           placeholder="Search location… e.g. V8W"
-          placeholderTextColor={colors.secondary}
+          placeholderTextColor={`${colors.primary}80`}
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
@@ -182,7 +184,7 @@ const LocationInput = ({ llSetter, ll, onLocationName }: Props) => {
       {!loading && value.length >= 3 && results.length === 0 && !selected && (
         <View className="mt-1 bg-pill border border-primary/20 rounded-xl p-3.5">
           <Text className="text-[11px] text-primary">
-            No locations found for "{value}"
+            No locations found for {value}
           </Text>
         </View>
       )}

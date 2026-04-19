@@ -23,7 +23,7 @@ const REASONS = [
 interface Props {
   targetUserId: string;
   targetName: string;
-  bottomSheetRef: React.RefObject<BottomSheet>;
+  bottomSheetRef: React.RefObject<BottomSheet> | null;
   onClose: () => void;
 }
 
@@ -70,7 +70,7 @@ export function ReportUserSheet({
         );
         return;
       }
-      console.log(await res.json());
+     
       if (!res.ok) throw new Error();
 
       Alert.alert("Report Submitted", "Our team will review it shortly.");

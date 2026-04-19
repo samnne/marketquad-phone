@@ -49,7 +49,7 @@ const AuthLayout = () => {
           </ScrollView>
         )}
 
-        {success && (
+        {/* {success && (
           <SuccessMessage
             message={msg.length === 0 ? "Success" : msg}
             setter={setSuccess}
@@ -60,7 +60,7 @@ const AuthLayout = () => {
             message={msg.length === 0 ? "An Error Occured" : msg}
             setter={setError}
           />
-        )}
+        )} */}
       </View>
     </KeyboardAvoidingView>
   );
@@ -71,7 +71,7 @@ const AuthContent = () => (
     {/* ── Logo + header ── */}
     <View className="gap-10">
       <Image
-        source={require("@/assets/logo.png")}
+        source={require("@/assets/icons/logo.png")}
         className="w-50 h-40"
         resizeMode="contain"
       />

@@ -10,38 +10,50 @@ export const tabs = [
   {
     name: "home",
     title: "Home",
-    icon: <FontAwesome5 name="home" size={24} color="black" />,
+    icon: ({ color }: { color: string }) => (
+      <FontAwesome5 name="home" size={16} color={color} />
+    ),
   },
   {
     name: "listings",
     title: "Listings",
-    icon: <AntDesign name="shopping-cart" size={24} color="black" />,
-  },
-  {
-    name: "new",
-    title: "New",
-    icon: <MaterialIcons name="add" size={24} color="black" />,
+    icon: ({ color }: { color: string }) => (
+      <AntDesign name="shopping-cart" size={16} color={color} />
+    ),
   },
   {
     name: "convos",
-    title: "Conversations",
-    icon: <FontAwesome6 name="inbox" size={24} color="black" />,
+    title: "Messages",
+    icon: ({ color }: { color: string }) => (
+      <FontAwesome6 name="inbox" size={16} color={color} />
+    ),
   },
   {
     name: "profile",
     title: "Profile",
-    icon: <Ionicons name="person-circle-outline" size={24} color="black" />,
+    icon: ({ color }: { color: string }) => (
+      <Ionicons name="person-circle-outline" size={16} color={color} />
+    ),
   },
 ];
+export const newSingle = {
+  name: "new",
+  title: "New",
+  icon: ({ color }: { color: string }) => (
+    <MaterialIcons name="add" size={16} color={color} />
+  ),
+};
 
 export const categories = [
   "All",
   "Textbooks",
-  "Electronics",
+  "Tech",
   "Housing",
-  "Notes",
+  "Dorm",
   "Clothes",
   "Sports",
+  "Leisure",
+  "School",
 ];
 export const condition = [
   "New",

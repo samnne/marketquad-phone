@@ -1,9 +1,12 @@
 import { colors, components } from "@/constants/theme";
 import { useRefresh } from "@/hooks/useRefresh";
 import { getConvos } from "@/lib/conversations.lib";
-import { useConvos, useMessage, useUser } from "@/store/zustand";
+import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
+import { Conversation } from "@/type";
 import { deleteConvo, fetchConvos, getUserSupabase } from "@/utils/functions";
+import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Image } from "moti";
 import { useEffect, useState } from "react";
 import {
   Alert,
@@ -50,9 +53,10 @@ const ConversationsScreen = () => {
   const bottomClearance = components.tabBar.height + insets.bottom;
 
   const { convos, setConvos, setSelectedConvo, removeConvo } = useConvos();
-  const { setError } = useMessage();
+  const { setError, setMessage } = useMessage();
   const [loading, setLoading] = useState(true);
   const { user, setUser } = useUser();
+  const { selectedListing, setSelectedListing } = useListings();
   const [query, setQuery] = useState("");
   const { refreshing, onRefresh } = useRefresh({
     func: async () => {
@@ -65,6 +69,7 @@ const ConversationsScreen = () => {
     const data = await getUserSupabase();
     if (!data.user) {
       setError(true);
+      setMessage("Please Sign In")
       router.replace("/sign-in");
       return;
     }
@@ -73,6 +78,7 @@ const ConversationsScreen = () => {
       setConvos(tempConvos);
     } catch (error) {
       setError(true);
+      setMessage("Error fetching messages")
       setLoading(false);
     } finally {
       setLoading(false);
@@ -101,13 +107,25 @@ const ConversationsScreen = () => {
             try {
               const res = await deleteConvo(cid, user?.id);
               if (res?.success) {
+                const removedConvos = selectedListing?.conversations?.filter(
+                  (convo: Conversation) => convo?.cid !== cid,
+                );
+
+                setSelectedListing({
+                  ...selectedListing,
+                  conversations: removedConvos,
+                });
+              
                 removeConvo(cid); // remove from zustand immediately
+                
               } else {
                 setError(true);
+                setMessage("Error deleting message")
               }
             } catch (err) {
               console.error(err);
               setError(true);
+              setMessage("Something went wrong")
             }
           },
         },
@@ -120,7 +138,9 @@ const ConversationsScreen = () => {
         const lastMsg = convo.messages?.[convo.messages.length - 1]?.text ?? "";
         return (
           title.toLowerCase().includes(query.toLowerCase()) ||
-          lastMsg.toLowerCase().includes(query.toLowerCase())
+          lastMsg.toLowerCase().includes(query.toLowerCase()) ||
+          convo?.buyer?.name?.toLowerCase()?.includes(query.toLowerCase()) ||
+          convo?.seller?.name?.toLowerCase()?.includes(query.toLowerCase())
         );
       })
     : (convos ?? []);
@@ -130,7 +150,7 @@ const ConversationsScreen = () => {
       className="flex-1 bg-background"
       contentContainerStyle={{ paddingBottom: bottomClearance }}
       showsVerticalScrollIndicator={false}
-      style={{ paddingTop: insets.top }}
+      style={{backgroundColor: colors.background}}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -140,18 +160,22 @@ const ConversationsScreen = () => {
         entering={FadeInDown.duration(300)}
         className="px-4 pt-4 pb-3"
       >
-        <View className="bg-pill border border-secondary/50 rounded-2xl px-4 py-2.5 flex-row items-center gap-2.5">
-          <Text className="text-text opacity-40 text-base">⌕</Text>
+        <View className="bg-pill p-4 rounded-xl flex-row items-center gap-2.5">
+          <FontAwesome6
+            name="magnifying-glass"
+            size={24}
+            color={`${colors.text}50`}
+          />
           <TextInput
-            className="flex-1 text-[13px] text-text"
+            className="flex-1 text-2xl  text-text"
             value={query}
             onChangeText={setQuery}
             placeholder="Search conversations…"
-            placeholderTextColor={colors.secondary}
+          placeholderTextColor={`${colors.text}50`}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")}>
-              <Text className="text-secondary text-sm">✕</Text>
+              <Text className="text-text text-sm">✕</Text>
             </Pressable>
           )}
         </View>
@@ -178,7 +202,7 @@ const ConversationsScreen = () => {
         <>
           {/* ── Section header ── */}
           <View className="flex-row justify-between items-center px-4 pt-2 pb-2">
-            <Text className="text-[11px] font-medium text-secondary uppercase tracking-widest">
+            <Text className="text-[11px] font-medium text-text uppercase tracking-widest">
               {query.trim()
                 ? `${filtered?.length} result${filtered?.length !== 1 ? "s" : ""}`
                 : "Recent"}
@@ -194,11 +218,15 @@ const ConversationsScreen = () => {
           {/* ── Convo rows ── */}
           {filtered?.map((convo, i) => {
             const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
-            const title = convo.listing?.title || "Unknown listing";
-            const initials = getInitials(title);
+            const isSeller = convo?.seller?.uid === user?.id;
+     
+            const otherUserName = isSeller ? convo?.buyer?.name : convo?.seller?.name;
+            const title = `${otherUserName ?? "Unknown"} • ${convo.listing?.title ?? "Unknown listing"}`;
+            const initials = getInitials(convo?.buyer?.name ?? '');
             const lastMsg = convo.messages?.[convo.messages.length - 1];
             const unread = convo.unreadCount ?? 0;
             const timestamp = convo.updatedAt ?? convo.createdAt;
+            const listing = convo.listing;
 
             return (
               <Animated.View
@@ -211,42 +239,33 @@ const ConversationsScreen = () => {
                     setSelectedConvo(convo);
                     router.push(`/convos/${convo.cid}`);
                   }}
-                  className="flex-row items-center gap-3 px-4 py-3.5 border-b border-secondary/20 active:bg-secondary/10"
+                  className="flex-row items-center gap-3 px-4 py-3.5 active:bg-secondary/10"
                 >
                   {/* Avatar */}
                   <View
+                    className="w-18  h-18 justify-center items-center rounded-2xl"
                     style={{
-                      width: 48,
-                      height: 48,
-                      borderRadius: 24,
-                      backgroundColor: color.bg,
-                      borderWidth: color.border ? 1.5 : 0,
-                      borderColor: color.border ?? "transparent",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      backgroundColor:
+                        color.bg
                     }}
                   >
-                    <Text
-                      style={{
-                        color: color.text,
-                        fontSize: 14,
-                        fontWeight: "700",
-                      }}
-                    >
-                      {initials}
-                    </Text>
+                    <Image
+                      source={{uri: listing?.imageUrls[0]}}
+                      className="flex-1 w-full rounded-2xl"
+                      resizeMode="cover"
+                    />
                   </View>
 
                   {/* Text */}
                   <View className="flex-1 gap-0.5 min-w-0">
                     <Text
-                      className="text-[14px] font-semibold text-text"
+                      className="text-xl font-semibold text-text"
                       numberOfLines={1}
                     >
                       {title}
                     </Text>
                     <Text
-                      className="text-[12px] text-secondary"
+                      className="text-[12px] text-secondary/75"
                       numberOfLines={1}
                     >
                       {lastMsg?.text ?? "Most recent message"}

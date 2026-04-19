@@ -32,6 +32,7 @@ import { getMessagesForConvo, sendMessage } from "@/lib/messages.lib";
 import { createConvo, getConvo } from "@/lib/conversations.lib";
 import ConvoInfoModal from "@/components/Modals/ConvoInfoModal";
 import ReviewModal from "@/components/Modals/ReviewModal";
+import { Message } from "@/type";
 
 const SafeAreaView = styled(RNSAV);
 const StyledText = styled(Text);
@@ -73,15 +74,12 @@ const CID = () => {
 
   const { selectedConvo, setSelectedConvo } = useConvos();
   const { setReviewModal, reviewModal } = useReviewModal();
-  const { setError } = useMessage();
+  const { setError, setMessage } = useMessage();
   const { user, setUser } = useUser();
   const { setSelectedListing } = useListings();
   const [infoModal, setInfoModal] = useState(false);
 
-  const [rating, setRating] = useState(0);
-  const [reviewText, setReviewText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const { removeConvo } = useConvos();
+
   const isBuyer = selectedConvo?.buyerId === user?.id;
   const isSeller = selectedConvo?.sellerId === user?.id;
   const otherUser = isBuyer ? selectedConvo?.seller : selectedConvo?.buyer;
@@ -95,8 +93,8 @@ const CID = () => {
 
   useEffect(() => {
     mountUser();
-    getListingMetaData();
     mountMessages();
+    getListingMetaData();
   }, [params.cid]);
 
   useEffect(() => {
@@ -128,7 +126,7 @@ const CID = () => {
     const convo = await getConvo(params.cid as string);
     if (!convo) {
       setError(true);
-   
+      setMessage("Couldn't fetch convo")
       router.back();
       return;
     }

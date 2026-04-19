@@ -1,4 +1,4 @@
-import ListingFormPage from "@/components/ListingFormPage";
+import ListingFormPage from "@/components/Listings/ListingFormPage";
 import { useLocalSearchParams } from "expo-router";
 
 import { KeyboardAvoidingView, Platform } from "react-native";

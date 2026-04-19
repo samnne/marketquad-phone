@@ -1,33 +1,30 @@
-import ListingCard from "@/components/ListingCard";
-import ListingModal from "@/components/ListingModal";
-import { BASE_URL } from "@/constants/constants";
-import { colors } from "@/constants/theme";
+import ListingCard from "@/components/Listings/ListingCard";
+
+import { BASE_URL, categories } from "@/constants/constants";
+import { colors, components } from "@/constants/theme";
 import { useRefresh } from "@/hooks/useRefresh";
 import { useListings, useMessage } from "@/store/zustand";
 import { fetchListings, getUserSupabase } from "@/utils/functions";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Pressable,
   RefreshControl,
   ScrollView,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const CATEGORIES = [
-  "All",
-  "Textbooks",
-  "Electronics",
-  "Clothes",
-  "Housing",
-  "Notes",
-  "Sports",
-  "Other",
-];
+import housing from "@/assets/images/housing.jpg";
+import vintage from "@/assets/images/vintage.jpg";
+import tech from "@/assets/images/tech.jpg";
+import textbooks from "@/assets/images/textbooks.jpg";
+import { Image } from "moti";
+import CategoryChips from "@/components/Utils/CategoryChips";
+import MarketQuad from "@/components/Utils/MarketQuad";
 
 const SkeletonCard = () => (
   <View className="bg-pill rounded-2xl border border-secondary/20 overflow-hidden flex-1">
@@ -47,18 +44,19 @@ export default function ListingsScreen() {
     search?: string;
     cat?: string;
   }>();
+  const contentRef = useRef<View>(null);
   const { listings, setListings, selectedListing, setSelectedListing } =
     useListings();
   const { refreshing, onRefresh } = useRefresh({
     func: async () => await fetchListings({ setter: setListings }),
   });
-  const { setError } = useMessage();
+  const { setError, setMessage } = useMessage();
 
   const [loading, setLoading] = useState(true);
   const [searchInput, setSearchInput] = useState(searchQuery ?? "");
   const [searchResults, setSearchResults] = useState<any[] | null>(null);
   const [activeCategory, setActiveCategory] = useState(cat ?? "All");
-  const [view, setView] = useState<"grid" | "list">("grid");
+  const [view, setView] = useState<"grid" | "list">("list");
 
   const baseListings =
     searchQuery && searchResults !== null ? searchResults : listings;
@@ -86,8 +84,13 @@ export default function ListingsScreen() {
           );
           if (!response.ok) throw new Error("Failed to fetch");
           const data = await response.json();
+
           if (data.success) setSearchResults(data.listings);
-          else setError(true);
+          else {
+            setMessage("Couldn't find that?");
+            setError(true);
+
+          }
         } else {
           setSearchResults(null);
           if (listings.length === 0)
@@ -96,12 +99,13 @@ export default function ListingsScreen() {
       } catch (err) {
         console.error(err);
         setError(true);
+        setMessage("Something went wrong...")
       } finally {
         setLoading(false);
       }
     };
     loadListings();
-  }, [searchQuery]);
+  }, [searchQuery, listings.length, setError, setListings, setMessage]);
 
   const handleSearch = () => {
     const val = searchInput.trim();
@@ -117,12 +121,58 @@ export default function ListingsScreen() {
   return (
     <ScrollView
       className="flex-1 bg-background"
-      style={{ paddingTop: insets.top }}
+      style={{
+        backgroundColor: colors.background,
+      }}
+      contentContainerStyle={{
+        paddingBottom: components.tabBar.height + insets.bottom,
+      }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
     >
+      <View className="flex-row flex-wrap w-full p-2">
+        {[
+          { name: "Housing", image: housing },
+          { name: "Textbooks", image: textbooks },
+          { name: "Tech", image: tech },
+          { name: "Clothes", image: vintage },
+        ].map((item, i) => (
+          <Pressable
+            onPress={() => {
+              if (contentRef.current) {
+              }
+              setActiveCategory(item.name);
+            }}
+            key={i}
+            className="w-1/2 aspect-square p-1"
+          >
+            <View className="relative flex-1 bg-accent justify-center items-center rounded-2xl">
+              <Image
+                source={item.image}
+                className="h-full w-full rounded-2xl"
+                resizeMode="cover"
+              />
+              <Text className="absolute bottom-0  text-white pb-2 uppercase  font-bold text-3xl">
+                {item.name}
+              </Text>
+            </View>
+          </Pressable>
+        ))}
+      </View>
+      <View className="gap-2 w-full h-40 p-4 justify-center items-center">
+        <Text className="text-4xl font-black text-center ">
+          Buy Local. Sell Better. <MarketQuad className="text-primary" />
+        </Text>
+        <Pressable
+          onPress={() => router.push("/new")}
+          className="px-4 py-2 bg-primary rounded-xl"
+        >
+          <Text className="text-xl font-black text-pill">SELL NOW</Text>
+        </Pressable>
+      </View>
+
       {/* ── Search bar ── */}
       <Animated.View
         entering={FadeInDown.duration(300)}
@@ -153,32 +203,7 @@ export default function ListingsScreen() {
       </Animated.View>
 
       {/* ── Category chips ── */}
-      <Animated.ScrollView
-        entering={FadeInDown.duration(300).delay(60)}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-2 px-4 pb-3"
-      >
-        {CATEGORIES.map((cat) => (
-          <Pressable
-            key={cat}
-            onPress={() => setActiveCategory(cat)}
-            className={`shrink-0 px-3.5 py-1.5 rounded-full border ${
-              activeCategory === cat
-                ? "bg-text border-text"
-                : "bg-pill border-secondary/50"
-            }`}
-          >
-            <Text
-              className={`text-[13px] font-medium ${
-                activeCategory === cat ? "text-primary" : "text-secondary"
-              }`}
-            >
-              {cat}
-            </Text>
-          </Pressable>
-        ))}
-      </Animated.ScrollView>
+      <CategoryChips {...{ activeCategory, setActiveCategory }} />
 
       {/* ── Header row ── */}
       <Animated.View
@@ -192,32 +217,10 @@ export default function ListingsScreen() {
         </Text>
 
         {/* Grid / list toggle */}
-        <View className="flex-row gap-1 bg-pill border border-secondary/50 rounded-xl p-1">
-          <Pressable
-            onPress={() => setView("grid")}
-            className={`w-7 h-7 rounded-lg items-center justify-center ${view === "grid" ? "bg-text" : ""}`}
-          >
-            <Text
-              className={`text-[10px] ${view === "grid" ? "text-primary" : "text-secondary"}`}
-            >
-              ⊞
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setView("list")}
-            className={`w-7 h-7 rounded-lg items-center justify-center ${view === "list" ? "bg-text" : ""}`}
-          >
-            <Text
-              className={`text-[10px] ${view === "list" ? "text-primary" : "text-secondary"}`}
-            >
-              ☰
-            </Text>
-          </Pressable>
-        </View>
       </Animated.View>
 
       {/* ── Content ── */}
-      <View className="px-4 pb-6">
+      <View ref={contentRef} className="px-4 pb-6">
         {loading ? (
           <View
             className={view === "grid" ? "flex-row flex-wrap gap-3" : "gap-3"}
@@ -238,10 +241,7 @@ export default function ListingsScreen() {
                 entering={FadeInDown.duration(300).delay(i * 50)}
                 className={view === "grid" ? "w-[48%]" : "w-full"}
               >
-                <ListingCard
-                  listing={listing}
-                  setSelectedListing={setSelectedListing}
-                />
+                <ListingCard listing={listing} />
               </Animated.View>
             ))}
           </View>
@@ -268,8 +268,7 @@ export default function ListingsScreen() {
           </View>
         )}
       </View>
-      {selectedListing && <ListingModal listing={selectedListing} />}
-      <View className="h-20" />
+      {/* {selectedListing && <ListingModal listing={selectedListing} />} */}
     </ScrollView>
   );
 }

@@ -1,13 +1,12 @@
-// components/Modals/ConvoInfoModal.tsx
 import { View, Text, ScrollView, Pressable, Modal, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { colors } from "@/constants/theme";
 import { deleteConvo } from "@/utils/functions";
-import { useConvos, useMessage, useUser } from "@/store/zustand";
+import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
 import { useRef, useState } from "react";
 import { ReportUserSheet } from "../ReportUserSheet";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet";
 
 type Props = {
   visible: boolean;
@@ -30,7 +29,8 @@ const ConvoInfoModal = ({
 }: Props) => {
   const router = useRouter();
   const { removeConvo } = useConvos();
-  const { setError } = useMessage();
+  const { setError, setMessage } = useMessage();
+  const {selectedListing, setSelectedListing} = useListings()
   const { user } = useUser();
   const [reportModal, setReportModal] = useState(false);
   const ref = useRef<BottomSheet>(null);
@@ -48,15 +48,21 @@ const ConvoInfoModal = ({
             try {
               const res = await deleteConvo(cid, user.id);
               if (res?.success) {
+                const removedConvos = selectedListing?.conversations?.filter((convo: any) => convo?.cid !== cid)
+
+                setSelectedListing({...selectedListing, conversations: removedConvos})
                 removeConvo(cid);
                 onClose();
                 router.replace("/convos");
+                setMessage("Conversation deleted successfully.");
               } else {
                 setError(true);
+                setMessage("Failed to delete conversation.");
               }
             } catch (err) {
               console.error(err);
               setError(true);
+              setMessage("An error occurred while deleting the conversation.");
             }
           },
         },

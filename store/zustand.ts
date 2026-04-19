@@ -3,14 +3,17 @@ import { create, StoreApi, UseBoundStore } from "zustand";
 
 import { db, STORAGE_KEY } from "@/db/db";
 
+type TYPEAUTH=  
+   "sign-in" | "sign-up" | "otp"
+
 export interface Store {
-  type: "sign-in" | "sign-up" | "otp";
-  changeType: Function;
+  type: TYPEAUTH;
+  changeType: (newType: TYPEAUTH) => void;
 }
-export const useType = create((set) => {
+export const useType: UseBoundStore<StoreApi<Store>> = create((set) => {
   const store: Store = {
     type: "sign-in",
-    changeType: (newType: string) => set({ type: newType }),
+    changeType: (newType: TYPEAUTH) => set({ type: newType }),
   };
   return { ...store };
 });
@@ -101,10 +104,15 @@ export const useConvos = create<ConvosState>((set) => ({
   selectedConvo: null,
   setConvos: (convos) => set({ convos }),
   setSelectedConvo: (convo) => set({ selectedConvo: convo }),
-  removeConvo: (cid) =>
-    set((state) => ({
-      convos: state.convos.filter((c) => c.cid !== cid),
-    })),
+  removeConvo: (cid) => {
+   
+    return set((state) => {
+     
+      return {
+        convos: state.convos.filter((c) => c.cid !== cid),
+      };
+    });
+  },
   reset: () => set({ convos: [], selectedConvo: null }),
 }));
 export interface ReviewModalState {

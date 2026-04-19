@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "mq-phone",
+    "name": "MarketQuad",
     "slug": "marketquad",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/ios-light.png",
+    "icon": "./assets/icons/ios-light.png",
     "scheme": "mqphone",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -15,19 +15,15 @@
         "ITSAppUsesNonExemptEncryption": false
       },
       "icon": {
-        "light": "./assets/ios-light.png",
-        "dark": "./assets/ios-light.png"
+        "light": "./assets/icons/ios-light.png"
       }
     },
-    "platforms": [
-      "ios",
-      "android"
-    ],
+    "platforms": ["ios", "android"],
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "monochromeImage": "./assets/adaptive-icon.png"
+        "foregroundImage": "./assets/icons/adaptive-icon.png",
+        "monochromeImage": "./assets/icons/adaptive-icon.png"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
@@ -41,15 +37,14 @@
     },
     "web": {
       "output": "static",
-      "bundler": "metro",
-      "favicon": "./assets/images/favicon.png"
+      "bundler": "metro"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash-icon-light.png",
+          "image": "./assets/icons/splash-icon-light.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
@@ -69,7 +64,7 @@
       [
         "expo-notifications",
         {
-          "icon": "./assets/ios-light.png",
+          "icon": "./assets/icons/ios-light.png",
           "color": "#ffffff"
         }
       ]

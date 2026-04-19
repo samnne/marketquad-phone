@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+
 import React from "react";
 
 import { useType } from "@/store/zustand";

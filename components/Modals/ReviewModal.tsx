@@ -1,7 +1,12 @@
-// components/Modals/ReviewModal.tsx
 import {
-  View, Text, TextInput, Pressable,
-  Modal, ActivityIndicator, Alert, StyleSheet,
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Modal,
+  ActivityIndicator,
+  Alert,
+  StyleSheet,
 } from "react-native";
 import { useState } from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -12,22 +17,29 @@ import StarRating from "@/components/StarRating";
 import { BASE_URL } from "@/constants/constants";
 
 type Props = {
-  visible:    boolean;
-  onClose:    () => void;
-  otherUser:  any;
-  isBuyer:    boolean;
-  role:       "BUYER" | "SELLER";
+  visible: boolean;
+  onClose: () => void;
+  otherUser: any;
+  isBuyer: boolean;
+  role: "BUYER" | "SELLER";
 };
 
 const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
-  const { user }     = useUser();
-  const { setError } = useMessage();
+  const { user } = useUser();
+  const { setError, setMessage } = useMessage();
 
-  const [rating,      setRating]      = useState(0);
-  const [reviewText,  setReviewText]  = useState("");
-  const [submitting,  setSubmitting]  = useState(false);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
-  const ratingLabel = ["Tap a star to rate", "Poor", "Fair", "Good", "Great", "Excellent!"][rating];
+  const ratingLabel = [
+    "Tap a star to rate",
+    "Poor",
+    "Fair",
+    "Good",
+    "Great",
+    "Excellent!",
+  ][rating];
 
   const handleSubmit = async () => {
     if (!rating) {
@@ -44,7 +56,7 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
         },
         body: JSON.stringify({
           rating,
-          comment:    reviewText,
+          comment: reviewText,
           revieweeId: otherUser?.uid,
           role,
         }),
@@ -57,10 +69,12 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
         Alert.alert("Review submitted", "Thanks for your feedback!");
       } else {
         setError(true);
+        setMessage("Review Error");
       }
     } catch (err) {
       console.error(err);
       setError(true);
+      setMessage("Something went wrong...");
     } finally {
       setSubmitting(false);
     }
@@ -80,7 +94,6 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
       onRequestClose={handleClose}
     >
       <View className="flex-1 bg-background">
-
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 py-3.5 border-b border-secondary/15 bg-pill">
           <Text className="text-[17px] font-extrabold text-text">
@@ -95,7 +108,6 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
         </View>
 
         <View className="p-4 gap-5">
-
           {/* Who you're reviewing */}
           {otherUser && (
             <View className="flex-row items-center gap-3 bg-pill border border-secondary/25 rounded-[20px] p-4">
@@ -152,14 +164,17 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
               rating > 0 ? "bg-text" : "bg-text/30"
             }`}
           >
-            {submitting
-              ? <ActivityIndicator color={colors.primary} />
-              : <Text className={`font-bold text-[15px] ${
+            {submitting ? (
+              <ActivityIndicator color={colors.primary} />
+            ) : (
+              <Text
+                className={`font-bold text-[15px] ${
                   rating > 0 ? "text-primary" : "text-primary/40"
-                }`}>
-                  Submit review
-                </Text>
-            }
+                }`}
+              >
+                Submit review
+              </Text>
+            )}
           </Pressable>
         </View>
       </View>
@@ -169,15 +184,15 @@ const ReviewModal = ({ visible, onClose, otherUser, isBuyer, role }: Props) => {
 
 const styles = StyleSheet.create({
   textArea: {
-    backgroundColor:  colors.pill,
-    borderWidth:      1,
-    borderColor:      colors.secondary + "40",
-    borderRadius:     12,
+    backgroundColor: colors.pill,
+    borderWidth: 1,
+    borderColor: colors.secondary + "40",
+    borderRadius: 12,
     paddingHorizontal: 14,
-    paddingVertical:  10,
-    fontSize:         14,
-    color:            colors.text,
-    minHeight:        80,
+    paddingVertical: 10,
+    fontSize: 14,
+    color: colors.text,
+    minHeight: 80,
     textAlignVertical: "top",
   },
 });

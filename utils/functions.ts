@@ -84,6 +84,6 @@ export const deleteConvo = async (cid: string, userId: string) => {
       Authorization: userId,
     },
   });
-  console.log(await response.json())
+
   return safeJson(response);
 };

@@ -1,33 +1,37 @@
 import { useMessage } from "@/store/zustand";
-import { AntDesign, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
-import { Text, TouchableOpacity, View } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
+import { MotiView } from "moti";
+import { Text, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type SuccessMessageProps = {
   message?: string;
-  onClose: () => void;
 };
 
-const SuccessMessage = ({ message = "Success", onClose }: SuccessMessageProps) => {
-  const {setSuccess} = useMessage()
+const SuccessMessage = ({ message = "Success" }: SuccessMessageProps) => {
+  const { setSuccess } = useMessage();
+  const insets = useSafeAreaInsets();
+
   return (
-    <View className="absolute bottom-10 left-0 right-0 z-50 px-4">
-      <View className="flex-row items-center justify-between bg-white border-2 border-green-500 rounded-2xl p-4 shadow-lg shadow-green-500/30">
-        
-        <View className="flex-row items-center gap-2 flex-1">
-          <Text className="text-green-500 text-lg"><MaterialIcons  name="error-outline" size={24} color="green" /></Text>
-          <Text className="text-green-500 text-base font-semibold shrink">{message}</Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={()=> setSuccess(false)}
-          activeOpacity={0.7}
-          className="ml-3 bg-green-500 rounded-xl px-4 py-2"
-        >
-          <Text className="text-white font-semibold "><AntDesign name="close-circle" size={24} color="white" /></Text>
+    <MotiView
+      from={{ opacity: 0, translateX: 12, scale: 0.95 }}
+      animate={{ opacity: 1, translateX: 0, scale: 1 }}
+      exit={{ opacity: 0, translateX: 12, scale: 0.95 }}
+      transition={{ type: "spring", damping: 18, stiffness: 200 }}
+      style={{ top: insets.top + 8, right: 16, position: "absolute", zIndex: 50 }}
+    >
+      <MotiView
+        from={{ backgroundColor: "#22c55e" }}
+        animate={{ backgroundColor: "#22c55e" }}
+        className="flex-row items-center gap-2 rounded-full px-4 py-2"
+      >
+        <AntDesign name="check-circle" size={14} color="white" />
+        <Text className="text-white text-sm font-semibold">{message}</Text>
+        <TouchableOpacity onPress={() => setSuccess(false)} activeOpacity={0.7}>
+          <AntDesign name="close" size={14} color="white" />
         </TouchableOpacity>
-
-      </View>
-    </View>
+      </MotiView>
+    </MotiView>
   );
 };
 

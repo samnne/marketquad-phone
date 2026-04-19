@@ -23,7 +23,7 @@
   --color-primary: #17f3b5;
   --color-secondary: #d282f9;
   --color-accent: #f544bd; */
-
+  
   --color-text: var(--color-text);
   --color-background: var(--color-background);
   --color-primary: var(--color-primary);

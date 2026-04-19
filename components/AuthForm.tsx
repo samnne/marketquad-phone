@@ -85,6 +85,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
     try {
       if (!formData.email || !matchUVIC(formData.email)) {
         setError(true);
+        setMessage("Please enter a valid UVic email address.");
         return;
       }
       const user = await supabase
@@ -104,7 +105,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
           console.log(error);
           return;
         }
-        return router.push("/(tabs)/profile");
+        return router.replace("/(tabs)/profile");
       }
       const { error } = await supabase.auth.signInWithOtp({
         email: formData.email,
@@ -120,6 +121,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
     } catch (err) {
       console.error(err);
       setError(true);
+      setMessage("An unexpected error occurred during login.");
     } finally {
       setLoadingLogin(false);
     }
@@ -131,17 +133,20 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
       const { email, password, name } = formData;
       if (!email || !password || !name) {
         setError(true);
+        setMessage("Please fill in all required fields.");
         return;
       }
       const { error } = await signUpUser(email, password, name);
       if (error) {
         setError(true);
+        setMessage("Sign up failed. Please try again.");
         return;
       }
       changeType("otp");
     } catch (err) {
       console.error(err);
       setError(true);
+      setMessage("An unexpected error occurred during sign up.");
     } finally {
       setLoadingSignup(false);
     }
@@ -150,15 +155,16 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
   const handleOTP = async () => {
     if (counter !== 0 || !otp || otp.length !== 6) {
       setError(true);
+      setMessage("Please enter a valid 6-digit OTP.");
       return;
     }
     if (!formData.email) {
       setError(true);
+      setMessage("Email is required.");
       return;
     }
 
     setLoadingOtp(true);
-    let veriUser;
     try {
       const {
         data: { user: supabaseUser },
@@ -179,6 +185,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
 
       if (!res.success) {
         setError(true);
+        setMessage("Verification failed. Please try again.");
         return;
       }
 
@@ -188,15 +195,17 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
 
       // 4. Navigate ONLY after state is set
       setSuccess(true);
+      setMessage("Verification successful!");
       router.replace("/home");
     } catch (err) {
       console.error(err);
       setError(true);
+      setMessage("Invalid OTP. Please try again.");
     } finally {
       setLoadingOtp(false);
     }
   };
-  // router.push('/profile')
+ 
   const handleForgotPassword = async () => {
     const { error } = await supabase.auth.resetPasswordForEmail(
       formData.email,
@@ -206,7 +215,11 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
     );
     if (error) {
       setError(true);
+      setMessage("Failed to send password reset email.");
       console.error(error);
+    } else {
+      setSuccess(true);
+      setMessage("Password reset email sent.");
     }
   };
 
@@ -228,7 +241,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
               Verification Code
             </Text>
             <Text className="text-sm text-secondary font-light">
-              We've sent a verification code to your UVic address
+              We&apos;ve sent a verification code to your UVic address
             </Text>
           </View>
 
@@ -236,9 +249,6 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
           <View className="flex-row justify-center gap-2">
             {[0, 1, 2, 3, 4, 5].map((i) => {
               const isFocused = otp.length === i;
-              const borderClass = isFocused
-                ? "border-primary"
-                : "border-secondary/50";
 
               return (
                 <View key={i} className="flex-row items-center">

@@ -1,4 +1,4 @@
-import ListingCard from "@/components/ListingCard";
+import ListingCard from "@/components/Listings/ListingCard";
 import { colors } from "@/constants/theme";
 import { useListings, useUser } from "@/store/zustand";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, FadeInLeft } from "react-native-reanimated";
-import ListingModal from "./ListingModal";
+import ListingModal from "./Listings/ListingModal";
 
 type Filter = "all" | "sold" | "archived";
 
@@ -36,7 +36,7 @@ const UserListings = ({
   });
 
   useEffect(() => {
-    if (pathname.includes("new")) {
+    if (pathname.includes("new") || pathname.split('/').length > 2) {
       setModals();
       return;
     }
@@ -134,7 +134,7 @@ const UserListings = ({
               >
                 <ListingCard
                   listing={listing}
-                  setSelectedListing={setSelectedListing}
+        
                 />
               </Animated.View>
             ))
@@ -206,7 +206,7 @@ const UserListings = ({
           )}
         </ScrollView>
       </View>
-      {selectedListing && <ListingModal listing={selectedListing} />}
+      {/* {selectedListing && <ListingModal listing={selectedListing} />} */}
     </Modal>
   );
 };

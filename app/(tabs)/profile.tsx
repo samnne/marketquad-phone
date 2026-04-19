@@ -4,6 +4,7 @@ import { BASE_URL } from "@/constants/constants";
 import { colors, components } from "@/constants/theme";
 import { useNotifications } from "@/context/NotificationContext";
 import { useRefresh } from "@/hooks/useRefresh";
+import { getConvos } from "@/lib/conversations.lib";
 import { getUserListings } from "@/lib/listing.lib";
 import { getPreferences } from "@/lib/preferences.lib";
 import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
@@ -46,12 +47,11 @@ export default function ProfileScreen() {
     setUser,
     reset: userReset,
   } = useUser();
-  const { reset: convoReset, convos } = useConvos();
+  const { reset: convoReset, convos, setConvos } = useConvos();
   const { reset: lisReset } = useListings();
-  const { setError, setSuccess } = useMessage();
+  const { setError, setSuccess, setMessage } = useMessage();
   const [deleteUser, setDeleteUser] = useState(false);
-  const noti = useNotifications()
-  console.log(noti)
+
   const { refreshing, onRefresh } = useRefresh({
     func: async () => {
       const { user: u, app_user } = await getUserSupabase();
@@ -59,6 +59,9 @@ export default function ProfileScreen() {
       if (!u) return;
       const ulst = await getUserListings(u.id);
       setUserListings(ulst.listings);
+
+      const convos = await getConvos(u.id);
+      if (convos) setConvos(convos);
 
       const res = await fetch(`${BASE_URL}/api/reviews/count`, {
         headers: { Authorization: u.id },
@@ -77,13 +80,14 @@ export default function ProfileScreen() {
 
       if (!u || error) {
         setError(true);
+        setMessage("Logged Out!")
         router.replace("/sign-in");
         return;
       }
       setUser({ ...u, app_user });
     };
     mountSession();
-  }, []);
+  }, [router, setError, setUser, setMessage]);
 
   useEffect(() => {
     const mountUserListings = async () => {
@@ -91,12 +95,15 @@ export default function ProfileScreen() {
       try {
         const { user: u, error, app_user } = await getUserSupabase();
         if (!u) return;
-        const { success, preferences } = await getPreferences(u.id);
+
         const tempListings = await getUserListings(u.id);
         if (!tempListings.listings) {
           setError(true);
+          setMessage("Couldn't fetch listings")
           return;
         }
+        const convos = await getConvos(u.id);
+        if (convos) setConvos(convos);
 
         setUserListings(tempListings.listings);
       } catch (err) {
@@ -105,7 +112,7 @@ export default function ProfileScreen() {
       }
     };
     mountUserListings();
-  }, [user]);
+  }, [user, setConvos, setError, setUserListings, userListings.length]);
 
   const handleLogout = async () => {
     Alert.alert("Log out", "Are you sure you want to log out?", [
@@ -121,6 +128,7 @@ export default function ProfileScreen() {
             { reset: convoReset },
           );
           setSuccess(true);
+          setMessage("Logged Out")
           router.replace("/sign-in");
         },
       },
@@ -145,7 +153,6 @@ export default function ProfileScreen() {
     <ScrollView
       className="flex-1 bg-background"
       contentContainerStyle={{ paddingBottom: bottomClearance }}
-      style={{ paddingTop: insets.top }}
       showsVerticalScrollIndicator={false}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -195,7 +202,7 @@ export default function ProfileScreen() {
 
             {/* Edit button */}
             <Pressable
-              onPress={() => router.push('/reports')}
+              onPress={() => router.push("/reports")}
               className="w-8 h-8 rounded-[9px] bg-background border border-primary items-center justify-center shrink-0"
             >
               <FontAwesome name="flag" size={12} color={colors.accent} />
