@@ -56,7 +56,7 @@ export const useUser: UseBoundStore<StoreApi<UserState>> = create((set) => {
     setUserListings: (listings: Listing[]) => set({ userListings: listings }),
     reset: () => set({ user: null, userListings: [] }),
     preferences: null,
-    setPreferences: (pref: UserPreferences | null) => ({ preferences: pref }),
+    setPreferences: (pref: UserPreferences | null) => set({ preferences: pref }),
   };
 });
 

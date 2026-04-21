@@ -92,6 +92,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
       if (error) {
         setError(true);
         setMessage("Failed to send OTP. Please try again.");
+        return 
       }
       changeType("otp");
     } catch (err) {
@@ -108,13 +109,18 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
         setMessage("Please enter a valid UVic email address.");
         return;
       }
-
+      
       const { data: userData } = await supabase
-        .from("User")
-        .select("*")
-        .eq("email", formData.email)
-        .single();
-
+      .from("User")
+      .select("*")
+      .eq("email", formData.email)
+      .single();
+      if (!userData){
+        
+        setError(true);
+        setMessage("User doesn't match our records.");
+        return;
+      }
       if (userData?.isVerified) {
         const { error } = await supabase.auth.signInWithPassword({
           email: formData.email,

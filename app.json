@@ -18,7 +18,10 @@
         "light": "./assets/icons/ios-light.png"
       }
     },
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
@@ -67,7 +70,16 @@
           "icon": "./assets/icons/ios-light.png",
           "color": "#ffffff"
         }
-      ]
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "marketquad"
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

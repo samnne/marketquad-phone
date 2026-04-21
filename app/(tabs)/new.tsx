@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ListingFormPage from "@/components/Listings/ListingFormPage";
 import { useLocalSearchParams } from "expo-router";
 
@@ -16,4 +17,10 @@ const NewPage = () => {
   );
 };
 
-export default NewPage;
+export default function NewEdit() {
+  return (
+    <ErrorBoundary>
+      <NewPage />
+    </ErrorBoundary>
+  );
+}

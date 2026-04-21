@@ -25,6 +25,7 @@ import textbooks from "@/assets/images/textbooks.jpg";
 import { Image } from "moti";
 import CategoryChips from "@/components/Utils/CategoryChips";
 import MarketQuad from "@/components/Utils/MarketQuad";
+import { ErrorBoundary, useErrorBoundary } from "@/components/ErrorBoundary";
 
 const SkeletonCard = () => (
   <View className="bg-pill rounded-2xl border border-secondary/20 overflow-hidden flex-1">
@@ -37,13 +38,14 @@ const SkeletonCard = () => (
   </View>
 );
 
-export default function ListingsScreen() {
+export function ListingsScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { search: searchQuery, cat } = useLocalSearchParams<{
     search?: string;
     cat?: string;
   }>();
+  const throwToBoundary = useErrorBoundary();
   const contentRef = useRef<View>(null);
   const { listings, setListings, selectedListing, setSelectedListing } =
     useListings();
@@ -83,8 +85,8 @@ export default function ListingsScreen() {
             { headers: { Authorization: user ? user.user?.id! : "0" } },
           );
           if (!response.ok) {
-            setError(true)
-            setMessage("Error Fetching Listings")
+            setError(true);
+            setMessage("Error Fetching Listings");
           }
           const data = await response.json();
 
@@ -92,7 +94,6 @@ export default function ListingsScreen() {
           else {
             setMessage("Couldn't find that?");
             setError(true);
-
           }
         } else {
           setSearchResults(null);
@@ -102,13 +103,13 @@ export default function ListingsScreen() {
       } catch (err) {
         console.error(err);
         setError(true);
-        setMessage("Something went wrong...")
+        setMessage("Something went wrong...");
       } finally {
         setLoading(false);
       }
     };
     loadListings();
-  }, [searchQuery, listings.length, setError, setListings, setMessage]);
+  }, [searchQuery, listings?.length, setError, setListings, setMessage]);
 
   const handleSearch = () => {
     const val = searchInput.trim();
@@ -273,5 +274,13 @@ export default function ListingsScreen() {
       </View>
       {/* {selectedListing && <ListingModal listing={selectedListing} />} */}
     </ScrollView>
+  );
+}
+
+export default function Listings() {
+  return (
+    <ErrorBoundary>
+      <ListingsScreen />
+    </ErrorBoundary>
   );
 }

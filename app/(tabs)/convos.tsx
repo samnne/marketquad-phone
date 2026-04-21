@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { colors, components } from "@/constants/theme";
 import { useRefresh } from "@/hooks/useRefresh";
 import { getConvos } from "@/lib/conversations.lib";
@@ -69,7 +70,7 @@ const ConversationsScreen = () => {
     const data = await getUserSupabase();
     if (!data.user) {
       setError(true);
-      setMessage("Please Sign In")
+      setMessage("Please Sign In");
       router.replace("/sign-in");
       return;
     }
@@ -78,7 +79,7 @@ const ConversationsScreen = () => {
       setConvos(tempConvos);
     } catch (error) {
       setError(true);
-      setMessage("Error fetching messages")
+      setMessage("Error fetching messages");
       setLoading(false);
     } finally {
       setLoading(false);
@@ -115,17 +116,16 @@ const ConversationsScreen = () => {
                   ...selectedListing,
                   conversations: removedConvos,
                 });
-              
+
                 removeConvo(cid); // remove from zustand immediately
-                
               } else {
                 setError(true);
-                setMessage("Error deleting message")
+                setMessage("Error deleting message");
               }
             } catch (err) {
               console.error(err);
               setError(true);
-              setMessage("Something went wrong")
+              setMessage("Something went wrong");
             }
           },
         },
@@ -150,7 +150,7 @@ const ConversationsScreen = () => {
       className="flex-1 bg-background"
       contentContainerStyle={{ paddingBottom: bottomClearance }}
       showsVerticalScrollIndicator={false}
-      style={{backgroundColor: colors.background}}
+      style={{ backgroundColor: colors.background }}
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -171,7 +171,7 @@ const ConversationsScreen = () => {
             value={query}
             onChangeText={setQuery}
             placeholder="Search conversations…"
-          placeholderTextColor={`${colors.text}50`}
+            placeholderTextColor={`${colors.text}50`}
           />
           {query.length > 0 && (
             <Pressable onPress={() => setQuery("")}>
@@ -219,10 +219,12 @@ const ConversationsScreen = () => {
           {filtered?.map((convo, i) => {
             const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
             const isSeller = convo?.seller?.uid === user?.id;
-     
-            const otherUserName = isSeller ? convo?.buyer?.name : convo?.seller?.name;
+
+            const otherUserName = isSeller
+              ? convo?.buyer?.name
+              : convo?.seller?.name;
             const title = `${otherUserName ?? "Unknown"} • ${convo.listing?.title ?? "Unknown listing"}`;
-            const initials = getInitials(convo?.buyer?.name ?? '');
+            const initials = getInitials(convo?.buyer?.name ?? "");
             const lastMsg = convo.messages?.[convo.messages.length - 1];
             const unread = convo.unreadCount ?? 0;
             const timestamp = convo.updatedAt ?? convo.createdAt;
@@ -245,12 +247,16 @@ const ConversationsScreen = () => {
                   <View
                     className="w-18  h-18 justify-center items-center rounded-2xl"
                     style={{
-                      backgroundColor:
-                        color.bg
+                      backgroundColor: color.bg,
                     }}
                   >
                     <Image
-                      source={{uri: listing?.imageUrls?.length > 0 ? listing?.imageUrls[0] : "#"}}
+                      source={{
+                        uri:
+                          listing?.imageUrls?.length > 0
+                            ? listing?.imageUrls[0]
+                            : "#",
+                      }}
                       className="flex-1 w-full rounded-2xl"
                       resizeMode="cover"
                     />
@@ -321,4 +327,10 @@ const ConversationsScreen = () => {
   );
 };
 
-export default ConversationsScreen;
+export default function Conversations() {
+  return (
+    <ErrorBoundary>
+      <ConversationsScreen />
+    </ErrorBoundary>
+  );
+}

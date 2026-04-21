@@ -37,11 +37,11 @@ import { Ionicons } from "@expo/vector-icons";
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const ListingFormSchema = z.object({
-  title: z.string().min(4, "Title Too Short"),
+  title: z.string().min(4, "Title Too Short").max(150).trim(),
   price: z.number().min(0).max(1000000),
-  description: z.string().min(0),
-  category: z.string().min(3, "Please Choose a Category"),
-  condition: z.string().min(3, "Please Choose a Condition"),
+  description: z.string().min(0).max(2000).trim(), // ← add max + trim
+  category: z.string().min(3, "Please Choose a Category").max(50).trim(),
+  condition: z.string().min(3, "Please Choose a Condition").max(50).trim(),
 });
 
 type ImageEntry = { uri: string; isRemote: boolean };
@@ -342,7 +342,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             ...userListings.filter((l) => l.lid !== res.listing?.lid),
             res.listing,
           ]);
-          router.replace(`/listings/${res.listing?.lid}`);
+          router.push(`/listings/${res.listing?.lid}`);
         } else {
           setError(true);
           setMessage("Failed to post listing. Please try again.");
@@ -382,7 +382,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             ...userListings.filter((l) => l.lid !== res.listing?.lid),
             res.listing,
           ]);
-          router.replace(`/listings/${res.listing?.lid}`);
+          router.push(`/listings/${res.listing?.lid}`);
         } else {
           setError(true);
           setMessage("Failed to update listing. Please try again.");
@@ -407,7 +407,6 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
     }
   };
 
-  
   return (
     <ScrollView
       className="flex-1 bg-background"

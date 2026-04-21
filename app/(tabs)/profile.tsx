@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import DeleteModal from "@/components/Modals/DeleteModal";
 import ProfileSections from "@/components/ProfileSections";
 import { BASE_URL } from "@/constants/constants";
@@ -25,13 +26,12 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 function getInitials(name?: string, email?: string) {
-  if (name)
-    return name[0]
+  if (name) return name[0];
   if (email) return email[0].toUpperCase();
   return "?";
 }
 
-export default function ProfileScreen() {
+function ProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const bottomClearance = components.tabBar.height + insets.bottom;
@@ -75,7 +75,7 @@ export default function ProfileScreen() {
 
       if (!u || error) {
         setError(true);
-        setMessage("Logged Out!")
+        setMessage("Logged Out!");
         router.replace("/sign-in");
         return;
       }
@@ -88,13 +88,13 @@ export default function ProfileScreen() {
     const mountUserListings = async () => {
       if (userListings.length > 0) return;
       try {
-        const { user: u, error, app_user } = await getUserSupabase();
+        const { user: u } = await getUserSupabase();
         if (!u) return;
 
         const tempListings = await getUserListings(u.id);
         if (!tempListings.listings) {
           setError(true);
-          setMessage("Couldn't fetch listings")
+          setMessage("Couldn't fetch listings");
           return;
         }
         const convos = await getConvos(u.id);
@@ -104,11 +104,18 @@ export default function ProfileScreen() {
       } catch (err) {
         console.error(err);
         setError(true);
-        setMessage("Something went wrong...")
+        setMessage("Something went wrong...");
       }
     };
     mountUserListings();
-  }, [user, setConvos, setError, setUserListings, userListings.length, setMessage]);
+  }, [
+    user,
+    setConvos,
+    setError,
+    setUserListings,
+    userListings.length,
+    setMessage,
+  ]);
 
   const handleLogout = async () => {
     Alert.alert("Log out", "Are you sure you want to log out?", [
@@ -124,7 +131,7 @@ export default function ProfileScreen() {
             { reset: convoReset },
           );
           setSuccess(true);
-          setMessage("Logged Out")
+          setMessage("Logged Out");
           router.replace("/sign-in");
         },
       },
@@ -137,7 +144,8 @@ export default function ProfileScreen() {
   const initials = getInitials(user?.app_user?.name, user?.app_user?.email);
   const isVerified = user?.app_user?.isVerified;
   const rating = user?.app_user?.rating;
-  const displayName = user?.app_user?.name ?? user?.app_user?.email?.split("@")[0] ?? "Welcome";
+  const displayName =
+    user?.app_user?.name ?? user?.app_user?.email?.split("@")[0] ?? "Welcome";
 
   const stats = [
     { num: userListings?.length ?? 0, label: "Listings" },
@@ -162,11 +170,13 @@ export default function ProfileScreen() {
         >
           <View className="flex-row items-center gap-3.5">
             {/* Avatar */}
-            <View className="w-16 h-16 rounded-full bg-primary items-center justify-center shrink-0">
+            <Pressable onPress={()=>{
+              router.push(`/profiles/${user?.id}`)
+            }} className="w-16 h-16 rounded-full bg-primary items-center justify-center shrink-0">
               <Text className="text-[20px] font-bold text-text">
                 {initials}
               </Text>
-            </View>
+            </Pressable>
 
             {/* Name / email / badge */}
             <View className="flex-1 min-w-0 gap-1">
@@ -335,5 +345,13 @@ export default function ProfileScreen() {
         />
       )}
     </ScrollView>
+  );
+}
+
+export default function Profile() {
+  return (
+    <ErrorBoundary>
+      <ProfileScreen />
+    </ErrorBoundary>
   );
 }

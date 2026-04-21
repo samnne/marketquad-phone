@@ -223,7 +223,7 @@ export default function ListingPage() {
   const safeImages = (listing.imageUrls ?? []).filter(
     (url: any) => typeof url === "string" && url.startsWith("http"),
   );
-
+  
   return (
     <View className="flex-1 bg-white" style={{}}>
       <KeyboardAvoidingView
@@ -321,11 +321,11 @@ export default function ListingPage() {
 
               {/* Seller row */}
               <View className="flex-row items-center gap-2.5 mt-4 pt-4 border-t border-background">
-                <View className="w-9 h-9 rounded-full bg-background items-center justify-center">
+                <Pressable onPress={() => router.push(`/profiles/${listing?.seller?.uid}`)} className="w-9 h-9 rounded-full bg-background items-center justify-center">
                   <Text className="text-sm font-bold text-text/70">
                     {(listing?.seller?.name?.[0] ?? "?").toUpperCase()}
                   </Text>
-                </View>
+                </Pressable>
                 <View className="flex-1">
                   <Text className="text-[13px] font-semibold text-text">
                     {listing?.seller?.name ?? "Seller"}

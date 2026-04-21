@@ -1,3 +1,4 @@
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import ListingCard from "@/components/Listings/ListingCard";
 import CategoryChips from "@/components/Utils/CategoryChips";
 import { categories } from "@/constants/constants";
@@ -39,7 +40,7 @@ const SectionTitle = ({
 );
 
 // ── HomeScreen ─────────────────────────────────────────────────────────────
-export default function HomeScreen() {
+function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { listings, setListings } = useListings();
@@ -137,10 +138,12 @@ export default function HomeScreen() {
         <CategoryChips {...{ activeCategory, setActiveCategory }} />
 
         {/* ── Feed ── */}
+
         {isFiltered ? (
           <View className="mt-2">
             {filtered.length === 0 ? (
-              <View className="p-12 items-center">
+              <View className="p-12 items-center gap-3">
+                <Text className="text-3xl">🏷️</Text>
                 <Text className="text-text/40 text-sm italic">
                   Nothing found in {activeCategory}
                 </Text>
@@ -155,21 +158,54 @@ export default function HomeScreen() {
               label="Trending on Campus"
               onSeeAll={() => router.push("/listings?sort=views")}
             />
-
-            {hot?.map((l) => (
-              <ListingCard key={l.lid} listing={l} />
-            ))}
+            {hot.length > 0 ? (
+              hot.map((l) => <ListingCard key={l.lid} listing={l} />)
+            ) : (
+              <View className="mx-4 my-2 py-10 items-center gap-2 bg-pill rounded-2xl border border-secondary/10">
+                <Text className="text-2xl"></Text>
+                <Text className="text-text font-semibold text-sm">
+                  Nothing trending yet
+                </Text>
+                <Text className="text-secondary text-xs text-center px-8">
+                  Be the first to post, your listing could be here.
+                </Text>
+              </View>
+            )}
 
             <SectionTitle
               label="Fresh Listings"
               onSeeAll={() => router.push("/listings")}
             />
-            {forYou?.map((l) => (
-              <ListingCard key={l.lid} listing={l} />
-            ))}
+            {forYou.length > 0 ? (
+              forYou.map((l) => <ListingCard key={l.lid} listing={l} />)
+            ) : (
+              <View className="mx-4 my-2 py-10 items-center gap-2 bg-pill rounded-2xl border border-secondary/10">
+                <Text className="text-text font-semibold text-sm">
+                  No listings yet
+                </Text>
+                <Text className="text-secondary text-xs text-center px-8">
+                  The marketplace is empty, list something and get it started.
+                </Text>
+                <Pressable
+                  onPress={() => router.push("/new")}
+                  className="mt-2 bg-primary px-5 py-2 rounded-xl"
+                >
+                  <Text className="text-pill font-bold text-sm">
+                    Post a listing
+                  </Text>
+                </Pressable>
+              </View>
+            )}
           </>
         )}
       </ScrollView>
     </View>
+  );
+}
+export default function Home() {
+  return (
+    <ErrorBoundary>
+      <HomeScreen />
+    </ErrorBoundary>
   );
 }

@@ -1,8 +1,10 @@
 import ErrorMessage from "@/components/Modals/ErrorMessage";
 import SuccessMessage from "@/components/Modals/SuccessMessage";
 import { useMessage } from "@/store/zustand";
+import { captureException } from "@sentry/react-native";
 import { Slot } from "expo-router";
 import {
+  Button,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -48,19 +50,6 @@ const AuthLayout = () => {
             <AuthContent />
           </ScrollView>
         )}
-
-        {/* {success && (
-          <SuccessMessage
-            message={msg.length === 0 ? "Success" : msg}
-            setter={setSuccess}
-          />
-        )}
-        {error && (
-          <ErrorMessage
-            message={msg.length === 0 ? "An Error Occured" : msg}
-            setter={setError}
-          />
-        )} */}
       </View>
     </KeyboardAvoidingView>
   );
@@ -83,6 +72,7 @@ const AuthContent = () => (
           UVic student only Marketplace. Built by a Student for Students.
         </Text>
       </View>
+      
     </View>
 
     {/* ── Screen content (login / signup form) ── */}

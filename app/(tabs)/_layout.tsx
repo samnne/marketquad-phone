@@ -14,6 +14,7 @@ import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SuccessMessage from "@/components/Modals/SuccessMessage";
 import ErrorMessage from "@/components/Modals/ErrorMessage";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
@@ -155,75 +156,82 @@ const TabsLayout = () => {
 
   return (
     <>
-      <AnimatePresence>
-        {success && <SuccessMessage message={msg} />}
-        {error && <ErrorMessage message={msg} />}
-      </AnimatePresence>
-      <Tabs
-        tabBar={(props) => <CustomTabBar {...props} />}
-        screenOptions={{
-          headerShown: true,
-          header: () => <CustomHeader />,
-          tabBarShowLabel: false,
-          tabBarButton: (props) => <HapticTab {...props} />,
-          tabBarStyle: {
-            position: "absolute",
-            bottom: Math.max(insets.bottom, tabBar.horizontalInset),
-            height: tabBar.height,
-            marginHorizontal: tabBar.horizontalInset,
-            borderRadius: tabBar.radius,
-            backgroundColor: "transparent",
-            borderTopWidth: 0,
-            elevation: 0,
-          },
-          tabBarItemStyle: {
-            marginVertical: 5, // 3. Nudge items to center or push up
-          },
-          animation: "shift",
-          tabBarIconStyle: {
-            width: tabBar.iconFrame,
+      <ErrorBoundary>
+        <AnimatePresence>
+          {success && <SuccessMessage message={msg} />}
+          {error && <ErrorMessage message={msg} />}
+        </AnimatePresence>
 
-            height: tabBar.height,
-            alignItems: "center",
-          },
-        }}
-        screenListeners={{
-          tabPress: (e) => {
-            const route = e.target?.split("-")[0]; // expo-router target format
-            const index = TAB_ORDER.findIndex(
-              (t) => t === `/${route}` || (route === "home" && t === "/home"),
-            );
-            if (index !== -1) setTabIndex(index);
-          },
-        }}
-      >
-        {tabs.map((tab) => (
+        <Tabs
+          tabBar={(props) => <CustomTabBar {...props} />}
+          screenOptions={{
+            headerShown: true,
+            header: () => <CustomHeader />,
+            tabBarShowLabel: false,
+            tabBarButton: (props) => <HapticTab {...props} />,
+            tabBarStyle: {
+              position: "absolute",
+              bottom: Math.max(insets.bottom, tabBar.horizontalInset),
+              height: tabBar.height,
+              marginHorizontal: tabBar.horizontalInset,
+              borderRadius: tabBar.radius,
+              backgroundColor: "transparent",
+              borderTopWidth: 0,
+              elevation: 0,
+            },
+            tabBarItemStyle: {
+              marginVertical: 5, // 3. Nudge items to center or push up
+            },
+            animation: "shift",
+            tabBarIconStyle: {
+              width: tabBar.iconFrame,
+
+              height: tabBar.height,
+              alignItems: "center",
+            },
+          }}
+          screenListeners={{
+            tabPress: (e) => {
+              const route = e.target?.split("-")[0]; // expo-router target format
+              const index = TAB_ORDER.findIndex(
+                (t) => t === `/${route}` || (route === "home" && t === "/home"),
+              );
+              if (index !== -1) setTabIndex(index);
+            },
+          }}
+        >
+          {tabs.map((tab) => (
+            <Tabs.Screen
+              key={`wewrq${tab.name}fewqrw`}
+              name={tab.name}
+              options={{
+                title: tab.title,
+                tabBarIcon: ({ focused }) => (
+                  <TabIcon
+                    focused={focused}
+                    icon={tab.icon}
+                    title={tab.title}
+                  />
+                ),
+              }}
+            />
+          ))}
           <Tabs.Screen
-            key={`wewrq${tab.name}fewqrw`}
-            name={tab.name}
+            key={`${newSingle.name}feqfubvdsjin`}
+            name={newSingle.name}
             options={{
-              title: tab.title,
+              title: newSingle.title,
               tabBarIcon: ({ focused }) => (
-                <TabIcon focused={focused} icon={tab.icon} title={tab.title} />
+                <TabIcon
+                  focused={focused}
+                  icon={newSingle.icon}
+                  title={newSingle.title}
+                />
               ),
             }}
           />
-        ))}
-        <Tabs.Screen
-          key={`${newSingle.name}feqfubvdsjin`}
-          name={newSingle.name}
-          options={{
-            title: newSingle.title,
-            tabBarIcon: ({ focused }) => (
-              <TabIcon
-                focused={focused}
-                icon={newSingle.icon}
-                title={newSingle.title}
-              />
-            ),
-          }}
-        />
-      </Tabs>
+        </Tabs>
+      </ErrorBoundary>
     </>
   );
 };
