@@ -8,7 +8,7 @@ import {
 import { editListingAction, newListingAction } from "@/lib/listing.lib";
 import { useListings, useMessage, usePrefs, useUser } from "@/store/zustand";
 import { getUserSupabase } from "@/utils/functions";
-import * as FileSystem from "expo-file-system";
+import { File } from "expo-file-system";
 import * as ImagePicker from "expo-image-picker";
 import { usePathname, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -271,7 +271,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
 
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ["images", "videos"],
+      mediaTypes: ["images"],
       allowsMultipleSelection: true,
       quality: 0.8,
       base64: false,
@@ -311,9 +311,13 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
         user.id,
       );
       await Promise.allSettled(
-        localImages.map(({ uri }) =>
-          FileSystem.deleteAsync(uri, { idempotent: true }),
-        ),
+        localImages.map(async ({ uri }) => {
+          try {
+            await new File(uri).delete();
+          } catch {
+            // ignore if file doesn't exist
+          }
+        }),
       );
       setUploading(false);
       const allImageUrls = [...remoteUrls, ...uploadedUrls];
@@ -382,6 +386,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             ...userListings.filter((l) => l.lid !== res.listing?.lid),
             res.listing,
           ]);
+
           router.push(`/listings/${res.listing?.lid}`);
         } else {
           setError(true);
@@ -430,7 +435,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             {images.map(({ uri }, i) => (
               <View
                 key={uri + i}
-                className="relative w-80 h-80 rounded-xl overflow-hidden"
+                className="w-full h-60 aspect-square relative rounded-xl overflow-hidden"
               >
                 <Image
                   source={{ uri }}
@@ -496,7 +501,13 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             placeholderTextColor={colors.primary + "40"}
             multiline
             numberOfLines={4}
+            maxLength={2000}
           />
+          <Text
+            className={`absolute right-2 bottom-2 ${formData.description.length > 2000 ? "text-red-500" : "text-gray-400"}  text-xs`}
+          >
+            {formData.description.length}/2000
+          </Text>
         </Row>
       </Section>
 
@@ -545,7 +556,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
       {/* ── Location ── */}
       <Section label="Location" delay={140}>
         <Row last>
-          <View className="p-3">
+          <View className="p-3  w-full min-h-20">
             <LocationInput
               llSetter={setLatLong}
               latLong={latLong}

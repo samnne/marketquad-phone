@@ -111,9 +111,9 @@ const LocationInput = ({ llSetter, latLong, onLocationName }: Props) => {
   };
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 py-2">
       {/* ── Input ── */}
-      <View className="flex-row  items-center bg-pill border border-primary/40 rounded-xl px-5 py-2.5 ">
+      <View className="flex-row flex-1  items-center bg-pill border border-primary/40 rounded-xl px-5 py-2.5 ">
         <TextInput
           value={value}
           onChangeText={(v) => {
@@ -125,7 +125,7 @@ const LocationInput = ({ llSetter, latLong, onLocationName }: Props) => {
           autoCorrect={false}
           autoCapitalize="none"
           returnKeyType="search"
-          className="w-full"
+          className="w-full h-9 flex-1"
         />
         {loading ? (
           <ActivityIndicator size="small" color={colors.primary} />
