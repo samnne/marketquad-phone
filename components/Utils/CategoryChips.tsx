@@ -19,18 +19,18 @@ const CategoryChips = ({
         className="flex-1"
       >
         {[...categories].map((cat) => {
-          const on = activeCategory === cat;
+          const on = activeCategory === cat.label;
           return (
             <Pressable
-              key={cat}
-              id={cat}
-              onPress={() => setActiveCategory(cat)}
+              key={cat.value}
+              id={cat.value}
+              onPress={() => setActiveCategory(cat.label)}
               className={`px-4 py-1.5 rounded-xl border ${on ? "bg-primary border-primary" : "bg-pill border-background"}`}
             >
               <Text
                 className={`text-lg font-bold ${on ? "text-pill" : "text-text/50"}`}
               >
-                {cat}
+                {cat.label}
               </Text>
             </Pressable>
           );

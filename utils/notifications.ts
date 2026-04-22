@@ -1,9 +1,10 @@
-// utils/notifications.ts
+
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import { supabase } from "@/supabase/authHelper";
+import { db } from "@/db/db";
+
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: true,
@@ -38,13 +39,26 @@ export async function registerPushToken(userId: string) {
   const projectId =
     Constants.expoConfig?.extra?.eas?.projectId ??
     Constants.easConfig?.projectId;
+  const t = db.getItem("NOTI_TOKEN") as string
+  
+  if (JSON.parse(t)){
+    return false
+  }
 
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
 
-  await fetch(`${process.env.EXPO_PUBLIC_BASE_URL}/api/notis`, {
-    method: "POST",
-    headers: { Authorization: userId, "Content-Type": "application/json" },
+  const response = await fetch(
+    `${process.env.EXPO_PUBLIC_BASE_URL}/api/notis`,
+    {
+      method: "POST",
+      headers: { Authorization: userId, "Content-Type": "application/json" },
 
-    body: JSON.stringify({ userId, token, platform: Platform.OS }),
-  });
+      body: JSON.stringify({ userId, token, platform: Platform.OS }),
+    },
+  ).then((res) => res.json());
+  if (!response.ok) return false;
+  db.setItem(
+    "NOTI_TOKEN",
+    JSON.stringify({ userId, token, platform: Platform.OS }),
+  );
 }

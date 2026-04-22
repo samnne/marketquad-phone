@@ -336,7 +336,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
           },
           user.id,
         );
-        console.log(res);
+     
         if (res.success) {
           setSuccess(true);
           setMessage("Listing posted successfully!");
@@ -356,7 +356,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
           selectedListing.imageUrls?.filter(
             (url: string) => !images.find((img) => img.uri === url),
           ) ?? [];
-        if (toDelete.length > 0)
+        if (toDelete?.length > 0)
           await fetch(`${BASE_URL}/api/cloudinary`, {
             method: "delete",
             body: JSON.stringify(toDelete),
@@ -377,7 +377,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
           },
           user.id,
         );
-        console.log(res);
+    
         if (res?.success) {
           setSuccess(true);
           setMessage("Listing updated successfully!");
@@ -450,7 +450,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
                 </Pressable>
               </View>
             ))}
-            {images.length < 10 && (
+            {images?.length < 10 && (
               <Pressable
                 onPress={pickImages}
                 className="w-24 h-24 rounded-xl border border-dashed border-secondary/30 bg-background items-center justify-center gap-1"
@@ -463,7 +463,7 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             )}
           </ScrollView>
           <Text className="text-[11px] text-primary/30 pb-3 px-4">
-            {images.length}/10 photos
+            {images?.length}/10 photos
           </Text>
         </Row>
       </Section>
@@ -504,9 +504,9 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             maxLength={2000}
           />
           <Text
-            className={`absolute right-2 bottom-2 ${formData.description.length > 2000 ? "text-red-500" : "text-gray-400"}  text-xs`}
+            className={`absolute right-2 bottom-2 ${formData.description?.length > 2000 ? "text-red-500" : "text-gray-400"}  text-xs`}
           >
-            {formData.description.length}/2000
+            {formData.description?.length}/2000
           </Text>
         </Row>
       </Section>
@@ -540,13 +540,13 @@ const ListingFormPage = ({ type }: { type: "new" | "edit" }) => {
             contentContainerStyle={{ gap: 8, padding: 14 }}
           >
             {categories
-              .filter((c) => c !== "All")
+              .filter((c) => c.label !== "All")
               .map((c) => (
                 <Chip
-                  key={c}
-                  label={c}
-                  active={c === formData.category}
-                  onPress={() => setFormData((p) => ({ ...p, category: c }))}
+                  key={c.label}
+                  label={c.label}
+                  active={c.value === formData.category}
+                  onPress={() => setFormData((p) => ({ ...p, category: c.value }))}
                 />
               ))}
           </ScrollView>

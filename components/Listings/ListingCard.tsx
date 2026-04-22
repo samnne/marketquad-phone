@@ -4,7 +4,7 @@ import Animated, {
   useAnimatedStyle,
   withSpring,
 } from "react-native-reanimated";
-import { useRouter } from "expo-router";
+import { usePathname, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { db } from "@/db/db";
 import { useEffect, useState } from "react";
@@ -19,7 +19,7 @@ const ListingCard = ({ listing }: { listing: any }) => {
   const router = useRouter();
   const { count, liked, loading, toggle } = useLike(
     listing?.lid,
-    listing.likes?.length > 0,
+    false,
     listing._count?.likes,
   );
 

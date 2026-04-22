@@ -187,6 +187,7 @@ export default function ListingPage() {
     setActionLoading(field);
     try {
       const updated = { ...listing, [field]: !listing[field] };
+      
       const res = await fetch(`${BASE_URL}/api/listings`, {
         method: "PUT",
         headers: { Authorization: user.id, "Content-Type": "application/json" },

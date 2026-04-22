@@ -2,10 +2,12 @@ import { View, Text, Pressable } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useUser } from "@/store/zustand";
 
 export default function CustomHeader() {
   const insets = useSafeAreaInsets();
     const router = useRouter()
+    const {user} = useUser()
   return (
     <View
       className="bg-pill border-b border-background flex-row items-center justify-between px-4 pb-3"
@@ -22,7 +24,7 @@ export default function CustomHeader() {
         <Pressable onPress={()=> router.push('/favs')}>
           <Ionicons name="bookmark-outline" size={22} color="#1a2e28" />
         </Pressable>
-        <Pressable onPress={()=>router.push('/profile')}>
+        <Pressable onPress={()=>router.push(`/settings/${user?.id}`)}>
           <Ionicons name="settings-outline" size={22} color="#1a2e28" />
         </Pressable>
       </View>

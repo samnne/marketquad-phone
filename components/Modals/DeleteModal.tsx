@@ -58,7 +58,7 @@ const DeleteModal = ({
         });
         const data = await response.json();
         const success = data.success;
-        console.log(data);
+        
         if (!success) {
           setError(true);
           setMessage(

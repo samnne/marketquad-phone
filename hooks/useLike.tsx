@@ -25,7 +25,7 @@ export function useLike(
         headers: { Authorization: user?.id! },
       });
       const data = await res.json();
-      console.log(data)
+      
       // reconcile with server truth
       setLiked(data.liked);
     } catch {

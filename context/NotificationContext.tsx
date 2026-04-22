@@ -1,4 +1,4 @@
-// context/NotificationContext.tsx
+
 import { createContext, useContext, useEffect, ReactNode } from "react";
 import * as Notifications from "expo-notifications";
 import { useRouter } from "expo-router";
@@ -23,8 +23,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
   // Register push token when user logs in
 
   useEffect(() => {
-    if (user?.id) registerPushToken(user?.id);
-  
+    if (user?.id) {
+    
+      registerPushToken(user?.id);
+    }
   }, [user]);
 
   // Handle notification tap → deep link

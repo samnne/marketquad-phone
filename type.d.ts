@@ -6,6 +6,11 @@ type PublicUser = {
   rating: number;
   hidden: boolean;
 };
+declare module "*.mp4" {
+  const src: string;
+  export default src;
+}
+type Intent = "buying" | "selling" | "both";
 
 type Review = {
   rid: string;
@@ -36,10 +41,17 @@ type Listing = {
 type ProfileData = {
   uid: string;
   name: string;
-  profileURL: string;
-  createdAt: string;
+  username: string;
+  profileURL: string | null;
+  bio: string | null;
+  faculty: string | null;
+  year: number | null;
+  intent: "buying" | "selling" | "both" | null;
+  category_interests: string[];
+  isVerified: boolean;
   rating: number;
   hidden: boolean;
+  createdAt: string;
   listings: Listing[];
-  reviewsReceived: Review[];  // ← matches Prisma include key
+  reviewsReceived: Review[];
 };

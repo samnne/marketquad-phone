@@ -4,7 +4,7 @@ import { MotiView } from 'moti';
 
 const TypingIndicator = () => {
   return (
-    <View className="flex-row items-center gap-1 bg-gray-100 rounded-[18px] rounded-bl-[5px] px-3.5 py-4 w-16 mt-2">
+    <View className="flex-row items-center gap-1 px-4 py-3 max-w-70 rounded-[18px] bg-primary/25 rounded-bl-[5px]  w-16 mt-2">
       {[0, 150, 300].map((delay, index) => (
         <MotiView
           key={index}
@@ -15,7 +15,7 @@ const TypingIndicator = () => {
             duration: 400,
             loop: true,
             repeatReverse: true,
-            delay: delay,
+            delay: delay * index,
           }}
           className="w-1.5 h-1.5 rounded-full bg-secondary"
         />

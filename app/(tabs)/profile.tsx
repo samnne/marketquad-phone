@@ -3,11 +3,11 @@ import DeleteModal from "@/components/Modals/DeleteModal";
 import ProfileSections from "@/components/ProfileSections";
 import { BASE_URL } from "@/constants/constants";
 import { colors, components } from "@/constants/theme";
-import { useNotifications } from "@/context/NotificationContext";
+
 import { useRefresh } from "@/hooks/useRefresh";
 import { getConvos } from "@/lib/conversations.lib";
 import { getUserListings } from "@/lib/listing.lib";
-import { getPreferences } from "@/lib/preferences.lib";
+
 import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
 import { supabase } from "@/supabase/authHelper";
 import { cleanUP, getUserSupabase } from "@/utils/functions";
@@ -33,6 +33,7 @@ function getInitials(name?: string, email?: string) {
 
 function ProfileScreen() {
   const router = useRouter();
+  
   const insets = useSafeAreaInsets();
   const bottomClearance = components.tabBar.height + insets.bottom;
   const {
@@ -70,6 +71,7 @@ function ProfileScreen() {
 
   // ── Mount ──
   useEffect(() => {
+    
     const mountSession = async () => {
       const { user: u, error, app_user } = await getUserSupabase();
 
@@ -80,6 +82,7 @@ function ProfileScreen() {
         return;
       }
       setUser({ ...u, app_user });
+      
     };
     mountSession();
   }, [router, setError, setUser, setMessage]);
@@ -153,6 +156,7 @@ function ProfileScreen() {
     { num: rating > 0 ? Number(rating).toFixed(1) : "—", label: "Rating" },
   ];
 
+
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -184,7 +188,7 @@ function ProfileScreen() {
                 className="text-[17px] font-bold text-text"
                 numberOfLines={1}
               >
-                {displayName}
+                {displayName} - <Text className="text-primary">@{user?.app_user?.username}</Text>
               </Text>
               <Text className="text-[12px] text-secondary" numberOfLines={1}>
                 {user?.app_user?.email}
@@ -338,8 +342,8 @@ function ProfileScreen() {
       {deleteUser && (
         <DeleteModal
           session={user}
-          lisReset={lisReset}
-          userReset={userReset}
+       
+          
           setDeleteUser={setDeleteUser}
           deleteUser={deleteUser}
         />

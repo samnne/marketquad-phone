@@ -1,6 +1,5 @@
-
 import { BASE_URL } from "@/constants/constants";
-import {  getUserSupabase } from "@/utils/functions";
+import { getUserSupabase } from "@/utils/functions";
 
 interface NewMessageProps {
   conversationId: string;
@@ -8,22 +7,26 @@ interface NewMessageProps {
   senderId: string;
 }
 
-export async function sendMessage(newMessage: NewMessageProps, user: User) {
+export async function sendMessage(
+  newMessage: NewMessageProps,
+  user: ProfileData,
+) {
   if (!newMessage.conversationId) throw new Error("conversationId is required");
-  
 
   if (user) {
-    const message = await fetch(`${BASE_URL}/api/message/${newMessage.conversationId}`, {
-      method: "POST",
-      headers: {
-        Authorization: newMessage.senderId,
+    const message = await fetch(
+      `${BASE_URL}/api/message/${newMessage.conversationId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: newMessage.senderId,
+        },
+        body: JSON.stringify({
+          ...newMessage,
+        }),
       },
-      body: JSON.stringify({
-        ...newMessage,
-        user,
-      }),
-    }).then((res) => res.json());
-
+    ).then((res) => res.json());
+   
     if (!message) {
       console.error("Error sending message:");
       return {
@@ -33,7 +36,7 @@ export async function sendMessage(newMessage: NewMessageProps, user: User) {
         message_text: newMessage.text,
       };
     }
-   
+
     return {
       success: true,
       message: "Message Sent",
@@ -51,7 +54,6 @@ export async function getMessagesForConvo(cid: string) {
     headers: {
       Authorization: user?.id!,
     },
-  
   }).then((res) => res.json());
 
   if (!messages) {

@@ -33,6 +33,7 @@ import { createConvo, getConvo } from "@/lib/conversations.lib";
 import ConvoInfoModal from "@/components/Modals/ConvoInfoModal";
 import ReviewModal from "@/components/Modals/ReviewModal";
 import { Message } from "@/type";
+import TypingIndicator from "@/components/TypingIndicator";
 
 const SafeAreaView = styled(RNSAV);
 const StyledText = styled(Text);
@@ -79,7 +80,6 @@ const CID = () => {
   const { setSelectedListing } = useListings();
   const [infoModal, setInfoModal] = useState(false);
 
-
   const isBuyer = selectedConvo?.buyerId === user?.id;
   const isSeller = selectedConvo?.sellerId === user?.id;
   const otherUser = isBuyer ? selectedConvo?.seller : selectedConvo?.buyer;
@@ -107,9 +107,13 @@ const CID = () => {
     }
 
     socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("typing", (val) => setTyping(val));
-    socket.on("message", ({ message }) => {
+    socket.on("typing", ({ cid, typing }) => {
+ 
+      if (cid !== params.cid) return; 
+      setTyping(typing);
+    });
+    socket.on("message", ({ cid, message }) => {
+      if (cid !== params.cid) return;
       setMessages((prev) => [...prev, message]);
     });
 
@@ -126,7 +130,7 @@ const CID = () => {
     const convo = await getConvo(params.cid as string);
     if (!convo) {
       setError(true);
-      setMessage("Couldn't fetch convo")
+      setMessage("Couldn't fetch convo");
       router.back();
       return;
     }
@@ -156,7 +160,15 @@ const CID = () => {
 
   const handleChangeText = (text: string) => {
     setMessageText(text);
-    socket.emit("typing", { cid: params.cid, typing: text.length > 0 });
+    
+    if (text.length > 3) {
+      
+      socket.emit("typing", { cid: params.cid, typing: true });
+      return 
+    }
+    
+    socket.emit("typing", { cid: params.cid, typing: false });
+   
   };
 
   const handleSendMessage = async () => {
@@ -171,6 +183,7 @@ const CID = () => {
       cid: params.cid,
       message: { senderId: user.id, text: tempText },
     });
+
     const isNullBuyerOrSeller =
       !selectedConvo?.buyerId || !selectedConvo?.sellerId;
     const otherId = messages.find(
@@ -188,15 +201,15 @@ const CID = () => {
         selectedConvo,
       );
       setSelectedConvo(newCon?.convo);
-  
     }
+
     const response = await sendMessage(
       {
         conversationId: params.cid as string,
         senderId: user.id,
         text: tempText,
       },
-      user,
+      user?.app_user,
     );
 
     if (response.new_message) {
@@ -206,7 +219,6 @@ const CID = () => {
     }
   };
 
- 
   const listing = selectedConvo?.listing;
 
   // --- Render Helpers ---
@@ -353,7 +365,7 @@ const CID = () => {
           <TouchableOpacity
             onPress={() => {
               setSelectedListing(listing);
-              
+
               router.navigate(`/listings/${listing?.lid}`);
             }}
             className="bg-green-600 px-3 py-1.5 rounded-lg"
@@ -375,8 +387,8 @@ const CID = () => {
         }
         ListFooterComponent={
           typing ? (
-            <View className="bg-gray-100 rounded-full px-4 py-2 w-16 items-center mt-2">
-              <ActivityIndicator size="small" color="#6b9e8a" />
+            <View className=" rounded-full px-4 py-1 w-16 items-center mt-2">
+              <TypingIndicator />
             </View>
           ) : null
         }

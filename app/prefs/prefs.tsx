@@ -197,7 +197,7 @@ export default function PrefsScreen() {
               Pre-selects this category when you open listings.
             </Text>
             <ChipRow
-              options={categories.filter((c) => c !== "All")}
+              options={categories.map((c) => c.label)}
               selected={prefs.defaultCategory}
               onSelect={(v) => update("defaultCategory", v)}
             />
@@ -268,7 +268,7 @@ export default function PrefsScreen() {
               <FontAwesome name="crosshairs" size={14} color={colors.primary} />
               <LocationInput
                 llSetter={setLatLong}
-                ll={latLong}
+                latLong={latLong}
                 onLocationName={(name) => {
                   update("defaultLat", latLong[0]);
                   update("defaultLng", latLong[1]);
