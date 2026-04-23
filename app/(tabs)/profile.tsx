@@ -343,7 +343,7 @@ function ProfileScreen() {
       {/* ── Delete modal ── */}
       {deleteUser && (
         <DeleteModal
-          session={user!}
+          session={user && null}
           setDeleteUser={setDeleteUser}
           deleteUser={deleteUser}
         />
