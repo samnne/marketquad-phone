@@ -72,7 +72,7 @@ type Listing = {
   views: number;
   description: string;
   sellerId: string;
-  seller: { name: string; profileURL: string; username: string, email: string };
+  seller: { name: string; profileURL: string; username: string; email: string };
   likes: [];
   conversations: Conversation[];
   _count: { likes: number };
@@ -88,6 +88,16 @@ type listingFormData = {
   sellerId: string;
   views?: number;
   category: string;
+};
+
+type BlockedUser = {
+  id: string;
+  blockerId: string;
+  blockedId: string;
+
+  createdAt: Date;
+  blocker: ProfileData;
+  blocked: ProfileData;
 };
 type ProfileData = {
   uid: string;
@@ -108,4 +118,5 @@ type ProfileData = {
   notif_messages: boolean;
   notif_listings: boolean;
   notif_sales: boolean;
+  Blocker: BlockedUser[];
 };

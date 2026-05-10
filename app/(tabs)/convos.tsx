@@ -77,7 +77,11 @@ const ConversationsScreen = () => {
     try {
       const tempConvos: Conversation[] = await getConvos(data.user.id);
       setConvos(tempConvos);
-      router.prefetch(`/convos/${tempConvos?.[0]?.cid}`)
+      if (tempConvos?.[0]){
+
+        router.prefetch(`/convos/${tempConvos?.[0]?.cid}`)
+      }
+      
    
     
     } catch (error) {

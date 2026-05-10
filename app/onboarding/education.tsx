@@ -1,5 +1,5 @@
 import { useUser } from "@/store/zustand";
-import { BASE_URL, FACULTIES, YEARS } from "@/constants/constants";
+import { BASE_URL, FACULTIES, onboardingTotal, YEARS } from "@/constants/constants";
 import { colors } from "@/constants/theme";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
@@ -86,7 +86,7 @@ const OnboardingVerification = () => {
         <View className="gap-8">
           {/* ── Top bar ── */}
           <View className="flex-row items-center justify-between">
-            <StepDots total={5} current={1} />
+            <StepDots total={onboardingTotal} current={2} />
             <Pressable
               onPress={() => router.push("/onboarding/intent")}
               hitSlop={12}

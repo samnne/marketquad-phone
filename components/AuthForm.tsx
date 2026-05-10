@@ -152,6 +152,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
   });
 
   useEffect(() => {
+ 
     const mountSession = async () => {
       const { user, app_user } = await getUserSupabase();
       if (user) {
@@ -224,7 +225,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
           return router.replace("/home");
         }
         setUser({ user: data.user, app_user: { ...userData } });
-        return router.replace("/onboarding");
+        return router.replace("/onboarding/guidelines");
       }
       await sendOTP();
       setCounter(60);
@@ -308,9 +309,9 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
       setSuccess(true);
       setMessage("Verification successful!");
       if (loggingIn) {
-        router.replace("/onboarding");
+        router.replace("/onboarding/guidelines");
       } else {
-        router.push("/onboarding");
+        router.push("/onboarding/guidelines");
       }
     } catch (err) {
       console.error(err);

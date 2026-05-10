@@ -23,7 +23,7 @@ export async function registerPushToken(userId: string) {
     const { status } = await Notifications.requestPermissionsAsync();
     finalStatus = status;
   }
-
+  
   if (finalStatus !== "granted") return;
 
   // Android channel required
@@ -42,7 +42,7 @@ export async function registerPushToken(userId: string) {
   const t = db.getItem("NOTI_TOKEN") as string
   
   if (JSON.parse(t)){
-    return false
+    return true
   }
 
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data;
@@ -61,4 +61,5 @@ export async function registerPushToken(userId: string) {
     "NOTI_TOKEN",
     JSON.stringify({ userId, token, platform: Platform.OS }),
   );
+  return true
 }

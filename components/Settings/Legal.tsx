@@ -6,7 +6,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 const LINKS = [
   { label: "Privacy Policy", icon: "shield-halved", url: "https://market-quad.com/privacy" },
   { label: "Terms of Service", icon: "file-lines", url: "https://market-quad.com/tos" },
-  { label: "Open source licenses", icon: "code", url: "https://market-quad.com/licenses" },
+  { label: "End User License Agreement (\"EULA\")", icon: "file-lines", url: "https://market-quad.com/eula" },
 ] as const;
 
 type Props = { open: boolean };

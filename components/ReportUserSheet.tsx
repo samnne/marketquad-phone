@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { colors } from "@/constants/theme";
-import { useMessage, useUser } from "@/store/zustand";
+import { useListings, useMessage, useUser } from "@/store/zustand";
 import { Redirect } from "expo-router";
 
 const REASONS = [
@@ -26,6 +26,7 @@ interface Props {
   targetName: string;
   bottomSheetRef: React.RefObject<BottomSheet> | null;
   onClose: () => void;
+  itemReported?: { item: string; id: string } | null | undefined;
 }
 
 export function ReportUserSheet({
@@ -33,15 +34,17 @@ export function ReportUserSheet({
   targetName,
   bottomSheetRef,
   onClose,
+  itemReported,
 }: Props) {
   const [selectedReason, setSelectedReason] = useState<string | null>(null);
   const [description, setDescription] = useState("");
   const [loading, setLoading] = useState(false);
-  const {setError, setMessage} = useMessage()
+  const { listings, setListings } = useListings();
+  const { setError, setMessage } = useMessage();
   const { user } = useUser();
   const handleSubmit = async () => {
-    if(!user){
-      return <Redirect href={'/sign-in'} />
+    if (!user) {
+      return <Redirect href={"/sign-in"} />;
     }
     if (!selectedReason)
       return Alert.alert(
@@ -63,6 +66,7 @@ export function ReportUserSheet({
             targetUserId,
             reason: selectedReason,
             description,
+            itemReported,
           }),
         },
       );
@@ -74,14 +78,23 @@ export function ReportUserSheet({
         );
         return;
       }
-     
+
       if (!res.ok) {
-        setMessage("Failed to submit, something went wrong.")
-        setError(true)
-        return 
+        setMessage("Failed to submit, something went wrong.");
+        setError(true);
+        return;
       }
 
-      Alert.alert("Report Submitted", "Our team will review it shortly.");
+      Alert.alert(
+        "Report Submitted",
+        "Our team will review it within 24 hours and get back to you.",
+      );
+      if (itemReported?.item === "LISTING") {
+        const newListings = listings.filter(
+          (listing) => listing.lid !== itemReported.id,
+        );
+        setListings(newListings);
+      }
       onClose();
     } catch (err) {
       console.error(err);
@@ -104,6 +117,7 @@ export function ReportUserSheet({
         shadowColor: colors.accent,
         shadowOpacity: 0.1,
       }}
+      enableDynamicSizing={false}
       handleIndicatorStyle={{ backgroundColor: colors.accent, width: 40 }}
     >
       <BottomSheetScrollView contentContainerClassName="px-6 pb-12 gap-4">

@@ -1,5 +1,5 @@
 import { useUser } from "@/store/zustand";
-import { BASE_URL, categories } from "@/constants/constants";
+import { BASE_URL, categories, onboardingTotal } from "@/constants/constants";
 import { colors } from "@/constants/theme";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useRouter } from "expo-router";
@@ -178,7 +178,7 @@ const OnboardingCategories = () => {
       >
         {/* ── Top bar ── */}
         <View className="flex-row items-center justify-between">
-          <StepDots total={5} current={3} />
+          <StepDots total={onboardingTotal} current={4} />
           <Pressable
             onPress={() => router.push("/onboarding/notifications")}
             hitSlop={12}

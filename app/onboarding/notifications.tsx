@@ -13,6 +13,8 @@ import notisVideo from "@/assets/Scene.mp4";
 import * as Notifications from "expo-notifications";
 import { SpringButton, StepDots } from "@/components/Onboarding";
 import { styled } from "nativewind";
+import { registerPushToken } from "@/utils/notifications";
+import { onboardingTotal } from "@/constants/constants";
 
 const SafeAreaView = styled(RNSAV);
 
@@ -85,13 +87,12 @@ const OnboardingNotifications = () => {
       if (!user) {
         return;
       }
-      const { status } = await Notifications.requestPermissionsAsync();
-      if (status !== "granted") {
-        // alert("Photo library access is required to update your profile picture. Please go to Settings > MarketQuad and enable Photos access.");
-
+      const didItWork = await registerPushToken(user?.id || user?.app_user?.uid)
+      
+      if (!didItWork) {
         return router.push("/permissions?type=noti");
       }
-      const enabled = status === "granted";
+  
 
       try {
         await fetch(
@@ -102,7 +103,7 @@ const OnboardingNotifications = () => {
               "Content-Type": "application/json",
               Authorization: user.id!,
             },
-            body: JSON.stringify({ notifications_enabled: enabled }),
+            body: JSON.stringify({ notifications_enabled: didItWork }),
           },
         );
       } catch (err) {
@@ -111,7 +112,7 @@ const OnboardingNotifications = () => {
 
       setUser({
         ...user,
-        app_user: { ...user?.app_user, notifications_enabled: enabled },
+        app_user: { ...user?.app_user, notifications_enabled: didItWork },
       });
     } catch (err) {
       console.error(err);
@@ -129,7 +130,7 @@ const OnboardingNotifications = () => {
       <View className="flex-1 px-6 pt-6 gap-8">
         {/* ── Top bar ── */}
         <View className="flex-row items-center justify-between">
-          <StepDots total={5} current={4} />
+          <StepDots total={onboardingTotal} current={5} />
           {/* No skip label — just an X to close */}
           <Pressable onPress={finish} hitSlop={12}>
             <FontAwesome6 name="xmark" size={16} color={colors.text} />

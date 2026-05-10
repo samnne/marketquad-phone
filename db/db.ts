@@ -1,4 +1,4 @@
-// db/storage.ts
+
 import "expo-sqlite/localStorage/install";
 
 export const db = {

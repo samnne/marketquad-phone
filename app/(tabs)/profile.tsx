@@ -1,4 +1,4 @@
-import ProfileSections from "@/components/ProfileSections";
+
 import UserListings from "@/components/UserListings";
 import { BASE_URL } from "@/constants/constants";
 import { colors, components } from "@/constants/theme";
@@ -113,6 +113,7 @@ function ProfileScreen() {
 
   useEffect(() => {
     mountSession();
+    
   }, [mountSession]);
 
   const handleLogout = async () => {
@@ -355,7 +356,7 @@ function ProfileScreen() {
               router.push({
                 pathname: `/settings/[uid]`,
                 params: {
-                  uid: user?.id!,
+                  uid: user?.id || user?.app_user.uid!,
                 },
               })
             }

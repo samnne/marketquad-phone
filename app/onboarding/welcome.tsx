@@ -45,7 +45,7 @@ const OnboardingWelcome = () => {
 
       }),
     }).then((r) => r.json());
-    console.log(res)
+    
     if (!res.success) {
       setError(true);
       setMessage(res.message ?? "Something went wrong. Please try again.");

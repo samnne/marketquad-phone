@@ -6,6 +6,8 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 export const UVIC_LNG_LAT: number[] = [-123.312603, 48.463816];
 export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL;
 
+export const onboardingTotal = 6
+
 export const tabs = [
   {
     name: "home",

@@ -1,5 +1,5 @@
 import { useUser } from "@/store/zustand";
-import { BASE_URL } from "@/constants/constants";
+import { BASE_URL, onboardingTotal } from "@/constants/constants";
 import { colors } from "@/constants/theme";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -58,7 +58,8 @@ const OnboardingProfile = () => {
 
   const usernameHint = getUsernameHint(username);
   const usernameOk = USERNAME_RE.test(username);
-  const canContinue = name.trim().length > 0 && usernameOk;
+  const canContinue = name.trim().length > 0 && usernameOk; 
+  
 
   const handlePickPhoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -112,7 +113,7 @@ const OnboardingProfile = () => {
       }
 
       setUser({ ...user, app_user: { ...user?.app_user, ...res.user } });
-      router.push("/onboarding/verification");
+      router.push("/onboarding/education");
     } catch (err) {
       console.error(err);
       setError("Network error. Please try again.");
@@ -139,9 +140,9 @@ const OnboardingProfile = () => {
           <View className="flex-1 gap-8">
             {/* ── Top bar ── */}
             <View className="flex-row items-center justify-between">
-              <StepDots total={5} current={0} />
+              <StepDots total={onboardingTotal} current={1} />
               <Pressable
-                onPress={() => router.push("/onboarding/verification")}
+                onPress={() => router.push("/onboarding/education")}
                 hitSlop={12}
               >
                 <Text className="text-sm text-text/70 font-medium">Skip</Text>

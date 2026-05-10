@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import { colors } from "@/constants/theme";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useUser } from "@/store/zustand";
+import { useMessage, useType, useUser } from "@/store/zustand";
+import { useRouter } from "expo-router";
 
 const STATUS_CONFIG: Record<
   string,
@@ -53,9 +54,18 @@ export default function MyReportsScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const insets = useSafeAreaInsets();
-
+  const {setError, setMessage} = useMessage()
   const { user } = useUser();
+  const {changeType} = useType()
+  const router = useRouter()
   const fetchReports = async () => {
+    if (!user) {
+        setError(true)
+        changeType("sign-in")
+        setMessage("Please Sign In.")
+        router.replace("/sign-in")
+        return
+    }
     try {
       const res = await fetch(
         `${process.env.EXPO_PUBLIC_BASE_URL}/api/reports`,

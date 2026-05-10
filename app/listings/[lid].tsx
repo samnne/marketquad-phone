@@ -7,7 +7,7 @@ import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
 import { getUserSupabase } from "@/utils/functions";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   KeyboardAvoidingView,
@@ -25,6 +25,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { useLike } from "@/hooks/useLike";
 import { MotiPressable } from "moti/interactions";
+import { ReportUserSheet } from "@/components/ReportUserSheet";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { colors } from "@/constants/theme";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const RANDOM_MESSAGES = [
@@ -60,6 +63,7 @@ export default function ListingPage() {
   const [actionLoading, setActionLoading] = useState<
     "edit" | "sold" | "archived" | "delete" | null
   >(null);
+  const [reportModal, setReportModal] = useState(false);
 
   const { setSelectedListing, selectedListing } = useListings();
   const { user, setUser, setUserListings, userListings } = useUser();
@@ -70,7 +74,7 @@ export default function ListingPage() {
   const expression = user?.app_user?.likes?.find(
     (l) => l.listingId === selectedListing?.lid,
   );
-
+  const ref = useRef<BottomSheet>(null);
   const {
     liked,
     count,
@@ -103,7 +107,7 @@ export default function ListingPage() {
       const expression = hovered || pressed;
 
       return {
-        scale: expression ? 0.95 : 1
+        scale: expression ? 0.95 : 1,
       };
     };
   }, []);
@@ -233,6 +237,9 @@ export default function ListingPage() {
       setActionLoading(null);
     }
   };
+  function handleReport(val: boolean) {
+    setReportModal(val);
+  }
 
   if (!listing?.title) {
     return (
@@ -241,6 +248,7 @@ export default function ListingPage() {
       </View>
     );
   }
+
 
   const isSeller = listing?.sellerId === user?.id;
   const existingConvo = (listing?.conversations ?? []).find(
@@ -289,6 +297,12 @@ export default function ListingPage() {
               className="w-10 h-10 rounded-full bg-pill/90 items-center justify-center shadow-sm"
             >
               <FontAwesome name="share" size={14} color="#1a2e28" />
+            </Pressable>
+            <Pressable
+              onPress={() => handleReport(true)}
+              className="w-10 h-10 rounded-full bg-pill/90 items-center justify-center shadow-sm"
+            >
+              <FontAwesome name="flag" size={14} color={colors.primary} />
             </Pressable>
           </View>
         </View>
@@ -616,10 +630,8 @@ export default function ListingPage() {
                     }}
                     animate={animateGoto}
                     style={{
-                      
-                     
-                      alignItems: 'center',
-                      justifyContent: 'center'
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
                     <View className="bg-text w-full py-4 rounded-2xl items-center">
@@ -632,6 +644,7 @@ export default function ListingPage() {
             )}
           </View>
         )}
+    
       </KeyboardAvoidingView>
     </View>
   );

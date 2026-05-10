@@ -4,7 +4,7 @@ import { useUser } from "@/store/zustand";
 import { Ionicons } from "@expo/vector-icons";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -26,6 +26,9 @@ import ListingCard from "@/components/Listings/ListingCard";
 import StarRating from "@/components/StarRating";
 import { useRefresh } from "@/hooks/useRefresh";
 import { getUserSupabase } from "@/utils/functions";
+
+import BottomSheet from "@gorhom/bottom-sheet";
+import BlockUserModal from "@/components/BlockUserModal";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -223,7 +226,7 @@ export default function PublicProfileScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user: currentUser } = useUser();
-
+  const [blockModal, setBlockModal] = useState(false);
   const [data, setData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -231,21 +234,27 @@ export default function PublicProfileScreen() {
     "listings",
   );
 
-  const fetchProfile = useCallback(async (authId?: string) => {
-    if (!uid || typeof uid !== "string") return;
-    try {
-      const res = await fetch(`${BASE_URL}/api/users/${uid}`, {
-        headers: { Authorization: authId ?? currentUser?.id ?? currentUser?.app_user?.uid ?? "" },
-      });
-      if (!res.ok) throw new Error("Failed to fetch profile");
-      const json = await res.json();
-      if (json.success) setData(json.data);
-      else throw new Error(json.message ?? "Unknown error");
-    } catch (err) {
-      setError("Couldn't load this profile.");
-      console.error(err);
-    }
-  }, [currentUser?.id, uid]);
+  const fetchProfile = useCallback(
+    async (authId?: string) => {
+      if (!uid || typeof uid !== "string") return;
+      try {
+        const res = await fetch(`${BASE_URL}/api/users/${uid}`, {
+          headers: {
+            Authorization:
+              authId ?? currentUser?.id ?? currentUser?.app_user?.uid ?? "",
+          },
+        });
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        const json = await res.json();
+        if (json.success) setData(json.data);
+        else throw new Error(json.message ?? "Unknown error");
+      } catch (err) {
+        setError("Couldn't load this profile.");
+        console.error(err);
+      }
+    },
+    [currentUser?.id, uid, currentUser?.app_user?.uid],
+  );
 
   const { refreshing, onRefresh } = useRefresh({
     func: async () => {
@@ -262,12 +271,15 @@ export default function PublicProfileScreen() {
   }, [uid, fetchProfile]);
 
   const activeListings =
-    data?.listings.filter((l) => !l.sold && !l.archived) ?? [];
+    data?.listings?.filter((l) => !l.sold && !l.archived) ?? [];
   const totalSales = data?.listings.filter((l) => l.sold).length ?? 0;
   const avgRating = data?.rating ?? 0;
   const yearLabel = data?.year ? YEAR_LABELS[data.year] : null;
-  const isOwnProfile = currentUser?.id === uid;
+  const isOwnProfile = currentUser?.app_user?.uid === uid;
 
+  function openBlockModal(val: boolean) {
+    setBlockModal(val);
+  }
   return (
     <ScrollView
       className="flex-1 bg-background"
@@ -276,8 +288,8 @@ export default function PublicProfileScreen() {
       keyboardShouldPersistTaps="handled"
       contentContainerStyle={{
         paddingBottom: components.tabBar.height + insets.bottom + 24,
-        flexGrow: 1,
       }}
+      contentContainerClassName="flex-1"
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
@@ -419,9 +431,30 @@ export default function PublicProfileScreen() {
               <View className="flex-row justify-end gap-2.5 pt-1 border-t border-secondary/10">
                 <Pressable
                   hitSlop={8}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/reports/[id]",
+                      params: {
+                        id: data?.uid,
+                        name: data?.name,
+                        type: "USER",
+                      },
+                    })
+                  }
                   className="w-10 h-10 rounded-xl bg-secondary/10 items-center justify-center"
                 >
                   <Ionicons name="flag-outline" size={16} color="#a97bc7" />
+                </Pressable>
+                <Pressable
+                  hitSlop={8}
+                  onPress={() => openBlockModal(true)}
+                  className="w-10 h-10 rounded-xl bg-red-500/10 items-center justify-center"
+                >
+                  <Ionicons
+                    name="ellipsis-horizontal"
+                    size={16}
+                    color={"red"}
+                  />
                 </Pressable>
               </View>
             )}
@@ -492,7 +525,7 @@ export default function PublicProfileScreen() {
                   </Animated.View>
                 ))
               )
-            ) : data.reviewsReceived.length === 0 ? (
+            ) : data?.reviewsReceived.length === 0 ? (
               <Animated.View
                 entering={FadeInDown.duration(300)}
                 className="items-center py-12 gap-2 bg-pill rounded-2xl border border-secondary/10 mt-1"
@@ -506,13 +539,20 @@ export default function PublicProfileScreen() {
                 </Text>
               </Animated.View>
             ) : (
-              data.reviewsReceived.map((review, i) => (
+              data?.reviewsReceived.map((review, i) => (
                 <ReviewCard key={review.rid} review={review} index={i} />
               ))
             )}
           </View>
         </>
       ) : null}
+      {blockModal && (
+        <BlockUserModal userToBlock={{
+          name: data?.name, 
+          id: data?.uid,
+          
+        }} type="block" setShowModal={setBlockModal} showModal={blockModal} />
+      )}
     </ScrollView>
   );
 }

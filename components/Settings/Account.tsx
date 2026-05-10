@@ -17,6 +17,7 @@ export default function AccountSection(props: Props) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+
   if (!props.open) return null;
 
   return (

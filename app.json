@@ -11,40 +11,41 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.samuelechefu.marketquad",
+      "icon": "./assets/icons/ios-light.png",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "MarketQuad accesses your photo library so you can select and upload images to your profile or listings. For example, you can choose a photo from your library to use as your profile picture or add product images to a listing.",
+        "NSPhotoLibraryUsageDescription": "MarketQuad accesses your photo library so you can select and upload images to your profile or listings. For example, you can choose a photo to use as your profile picture or add product images to a listing.",
         "NSPhotoLibraryAddUsageDescription": "MarketQuad saves images to your photo library when you download photos from listings or your profile.",
-        "NSCameraUsageDescription": "MarketQuad uses your camera so you can take and upload photos directly to your profile or listings."
-      },
-      "icon": {
-        "light": "./assets/icons/ios-light.png"
+        "NSCameraUsageDescription": "MarketQuad uses your camera so you can take and upload photos directly to your profile or listings.",
+        "NSLocationWhenInUseUsageDescription": "MarketQuad uses your location to show you listings near your campus and help buyers and sellers meet up safely.",
+        "NSUserNotificationsUsageDescription": "MarketQuad sends you notifications when someone messages you, makes an offer, or your listing gets a new view."
       }
     },
-    "platforms": [
-      "ios",
-      "android"
-    ],
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/icons/adaptive-icon.png",
-        "monochromeImage": "./assets/icons/adaptive-icon.png"
+        "monochromeImage": "./assets/icons/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
+      "package": "com.samuelechefu.marketquad",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
-      ],
-      "package": "com.samuelechefu.marketquad"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.CAMERA",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.VIBRATE"
+      ]
     },
     "web": {
       "output": "static",
       "bundler": "metro"
     },
+    "platforms": ["ios", "android"],
     "plugins": [
       "expo-router",
       [
@@ -55,36 +56,11 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff",
           "dark": {
+            "image": "./assets/icons/splash-icon-dark.png",
             "backgroundColor": "#000000"
           }
         }
       ],
-      "expo-sqlite",
-      [
-        "expo-maps",
-        {
-          "requestLocationPermission": true,
-          "locationPermission": "Allow $(PRODUCT_NAME) to use your location"
-        }
-      ],
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/icons/ios-light.png",
-          "color": "#ffffff"
-        }
-      ],
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "react-native",
-          "organization": "marketquad"
-        }
-      ],
-      "expo-localization",
-      "expo-video",
-      "@sentry/react-native",
       [
         "expo-image-picker",
         {
@@ -100,7 +76,34 @@
           }
         }
       ],
-      "expo-web-browser"
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icons/ios-light.png",
+          "color": "#ffffff",
+          "defaultChannel": "default",
+          "sounds": []
+        }
+      ],
+      [
+        "expo-maps",
+        {
+          "requestLocationPermission": true,
+          "locationPermission": "Allow MarketQuad to use your location to show nearby listings and help arrange safe meetups."
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "react-native",
+          "organization": "marketquad"
+        }
+      ],
+      "expo-sqlite",
+      "expo-localization",
+      "expo-video",
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,

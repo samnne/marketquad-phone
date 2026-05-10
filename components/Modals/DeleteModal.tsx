@@ -1,5 +1,5 @@
 import { BASE_URL } from "@/constants/constants";
-import { useConvos, useListings, useMessage, useUser } from "@/store/zustand";
+import { useConvos, useListings, useMessage, useType, useUser } from "@/store/zustand";
 import { supabase } from "@/supabase/authHelper";
 import { cleanUP } from "@/utils/functions";
 import { User } from "@supabase/supabase-js";
@@ -17,6 +17,7 @@ const DeleteModal = ({
   session: User | null;
 }) => {
   const { reset: lisReset } = useListings();
+  const {changeType} = useType()
   const { reset: userReset } = useUser();
   const { reset: convoReset } = useConvos();
   const { setError, setMessage } = useMessage();
@@ -34,12 +35,15 @@ const DeleteModal = ({
             Authorization: session.id,
           },
         });
+        
         const data = await response.json();
+      
         const reports = data.reports;
-        const notResolved = reports.filter(
+        
+        const notResolved = reports?.filter(
           (report: {status: string}) => report?.status !== "RESOLVED",
         );
-        if (notResolved.length === 0) {
+        if (notResolved?.length === 0) {
           setCantDelete(false);
         }
       } catch (err) {
@@ -82,7 +86,8 @@ const DeleteModal = ({
           { reset: convoReset },
         );
         setDeleteUser(false);
-        router.push("/(auth)/sign-in");
+        changeType("sign-up")
+        router.replace("/(auth)/sign-in");
       } catch (err) {
         setError(true);
         setMessage(

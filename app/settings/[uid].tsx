@@ -18,6 +18,9 @@ import AboutSection from "@/components/Settings/Legal";
 import DeleteModal from "@/components/Modals/DeleteModal";
 import { uploadPFP } from "@/cloudinary/cloudinary";
 import { sanitizeText } from "@/utils/functions";
+import NotificationsSection from "@/components/Settings/Notification";
+import { registerPushToken } from "@/utils/notifications";
+import BlockedUsers from "../../components/Settings/BlockedUsers";
 
 type Section =
   | "profile"
@@ -26,6 +29,7 @@ type Section =
   | "account"
   | "notifications"
   | "about"
+  | "blocked"
   | null;
 type Intent = "buying" | "selling" | "both";
 
@@ -226,6 +230,12 @@ const SettingsPage = () => {
   const saveNotifications = async () => {
     setSavingNotif(true);
     try {
+      const response = await registerPushToken(
+        user?.id || user?.app_user?.uid!,
+      );
+      if (!response) {
+        return router.push("/permissions?type=noti");
+      }
       const res = await fetch(
         `${BASE_URL}/api/users/onboarding/notifications`,
         {
@@ -365,7 +375,7 @@ const SettingsPage = () => {
         </View>
 
         {/* ── Notifications ── */}
-        {/* <View className="bg-pill rounded-2xl border border-secondary/15 overflow-hidden">
+        <View className="bg-pill rounded-2xl border border-secondary/15 overflow-hidden">
           <SectionRow
             icon="bell"
             label="Notifications"
@@ -374,22 +384,49 @@ const SettingsPage = () => {
             onPress={() => toggle("notifications")}
             iconBg="bg-primary/10"
           />
-        
-        </View> */}
+          <NotificationsSection
+            open={open === "notifications"}
+            notifMessages={notifMessages}
+            notifListings={notifListings}
+            notifSales={notifSales}
+            setNotifMessages={setNotifMessages}
+            setNotifListings={setNotifListings}
+            setNotifSales={setNotifSales}
+            save={saveNotifications}
+            loading={savingNotif}
+          />
+        </View>
 
         {/* ── Account ── */}
         <View className="bg-pill rounded-2xl border border-secondary/15 overflow-hidden">
           <SectionRow
+            icon="ban"
+            label="Blocked Users"
+            sublabel={user?.app_user.Blocker?.[0]?.blocked?.name ?? ""}
+            open={open === "blocked"}
+            onPress={() => toggle("blocked")}
+            iconBg="bg-primary/10"
+          />
+          <BlockedUsers
+            open={open === "blocked"}
+            blockedUsers={user?.app_user.Blocker!}
+            save={savePassword}
+            loading={savingPw}
+            onDeleteAccount={() => setDeleteUser(true)}
+          />
+        </View>
+        <View className="bg-pill rounded-2xl border border-secondary/15 overflow-hidden">
+          <SectionRow
             icon="lock"
             label="Account"
-            sublabel={user?.email ?? ""}
+            sublabel={user?.email ?? user?.app_user.email ?? ""}
             open={open === "account"}
             onPress={() => toggle("account")}
             iconBg="bg-primary/10"
           />
           <AccountSection
             open={open === "account"}
-            email={user?.email ?? ""}
+            email={user?.email ?? user?.app_user.email ?? ""}
             save={savePassword}
             loading={savingPw}
             onDeleteAccount={() => setDeleteUser(true)}

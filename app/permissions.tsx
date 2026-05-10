@@ -60,6 +60,7 @@ const Permissions = () => {
   const handleNext = async () => {
     if (type === 'noti') {
       const { status: existing } = await Notifications.getPermissionsAsync()
+   
       if (existing === 'granted') { advance(); return }
       if (existing === 'denied') { openSettings(); return }
       const { status } = await Notifications.requestPermissionsAsync()
