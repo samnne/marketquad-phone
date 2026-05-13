@@ -1,4 +1,4 @@
-import { View, Text, Modal, TouchableOpacity } from "react-native";
+import { View, Text, Modal, TouchableOpacity, ActivityIndicator } from "react-native";
 import React, { useState } from "react";
 import { BASE_URL } from "@/constants/constants";
 import { useMessage, useUser } from "@/store/zustand";
@@ -11,7 +11,7 @@ const BlockUserModal = ({
   type,
 }: {
   showModal: boolean;
-  userToBlock?: { name: string; id: string , blockId?: string};
+  userToBlock?: { name: string; id: string; blockId?: string };
   setShowModal: (val: boolean) => void;
   type?: "block" | "unblock";
 }) => {
@@ -23,36 +23,51 @@ const BlockUserModal = ({
   function closeModal() {
     setShowModal(false);
   }
-  
 
   async function handleBlockUser() {
-    if (cantBlock || !user?.id || !userToBlock) {
+    if (!user?.app_user?.uid || !userToBlock) {
       return;
     }
+    setCantBlock(true);
     try {
       const res = await fetch(`${BASE_URL}/api/users/${userToBlock.id}`, {
         method: "PUT",
         headers: {
-          Authorization: user?.id,
+          Authorization: user?.app_user?.uid,
         },
         body: JSON.stringify({
           type: type,
-          blockId: userToBlock?.blockId || null
+          blockId: userToBlock?.blockId || null,
         }),
       }).then((res) => res.json());
+
       if (res?.data) {
         setSuccess(true);
         setMessage(res?.message);
-        
-        setUser({...user, app_user: {...user.app_user, Blocker: type==="block" ? [...user.app_user.Blocker, res.data] : user?.app_user.Blocker.filter(block => block.id !== userToBlock?.blockId)}}) 
+
+        setUser({
+          ...user,
+          app_user: {
+            ...user.app_user,
+            Blocker:
+              type === "block"
+                ? [...user.app_user.Blocker, res.data]
+                : user?.app_user.Blocker.filter(
+                    (block) => block.id !== userToBlock?.blockId,
+                  ),
+          },
+        });
         if (router.canGoBack()) {
           router.back();
         }
+        setShowModal(false);
       }
     } catch (error) {
       console.log(error);
       setError(true);
       setMessage("Failed to block user");
+    } finally {
+      setCantBlock(false);
     }
   }
   const blockOrUnblock = type === "block" ? "block" : "unblock";
@@ -82,8 +97,7 @@ const BlockUserModal = ({
 
             {type === "block" && (
               <Text className=" text-lg">
-                You can unblock {userToBlock?.name} in settings at any
-                time.
+                You can unblock {userToBlock?.name} in settings at any time.
               </Text>
             )}
           </View>
@@ -102,9 +116,13 @@ const BlockUserModal = ({
               className={`${cantBlock ? "opacity-50" : "opacity-100"} flex-1  bg-primary py-3.5 rounded-full items-center`}
               disabled={cantBlock}
             >
-              <Text className="text-white text-[14px] font-bold">
-                {type === "block" ? "Block" : "Unblock"} User
-              </Text>
+              {cantBlock ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-white text-[14px] font-bold">
+                  {type === "block" ? "Block" : "Unblock"} User
+                </Text>
+              )}
             </TouchableOpacity>
           </View>
         </TouchableOpacity>

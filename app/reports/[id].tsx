@@ -11,7 +11,7 @@ const NEWREPORTPAGE = () => {
   const params = useLocalSearchParams();
   const id = params.id as string | undefined;
   const name = params.name as string | undefined;
-  const type = params.type as string | undefined;
+  const type = params.type as "LISTING" | "USER" | undefined;
   const router = useRouter()
   const [reportModal, setReportModal] = useState(true);
   function openReportModal(val: boolean) {

@@ -12,7 +12,6 @@ import {
   Alert,
   Pressable,
   RefreshControl,
- 
   Text,
   TextInput,
   View,
@@ -49,7 +48,7 @@ function timeAgo(date: string | Date) {
 
 const ConversationsScreen = () => {
   const router = useRouter();
-  
+
   const insets = useSafeAreaInsets();
   const bottomClearance = components.tabBar.height + insets.bottom;
 
@@ -77,13 +76,9 @@ const ConversationsScreen = () => {
     try {
       const tempConvos: Conversation[] = await getConvos(data.user.id);
       setConvos(tempConvos);
-      if (tempConvos?.[0]){
-
-        router.prefetch(`/convos/${tempConvos?.[0]?.cid}`)
+      if (tempConvos?.[0]) {
+        router.prefetch(`/convos/${tempConvos?.[0]?.cid}`);
       }
-      
-   
-    
     } catch (error) {
       setError(true);
       console.error(error);
@@ -91,7 +86,7 @@ const ConversationsScreen = () => {
       setLoading(false);
     } finally {
       setLoading(false);
-      setUser({ user: data.user, app_user: data.app_user });
+      setUser({ ...data.user, app_user: data.app_user });
     }
   }, [setUser, setError, setLoading, setMessage, router, setConvos]);
 
@@ -162,7 +157,6 @@ const ConversationsScreen = () => {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
-      
     >
       {/* ── Search ── */}
       <Animated.View

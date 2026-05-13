@@ -58,6 +58,7 @@ export default function MyReportsScreen() {
   const { user } = useUser();
   const {changeType} = useType()
   const router = useRouter()
+  console.log(reports)
   const fetchReports = async () => {
     if (!user) {
         setError(true)
@@ -77,7 +78,7 @@ export default function MyReportsScreen() {
         },
       );
       const data = await res.json();
-      setReports(data.reports ?? []);
+      setReports(data?.reports ?? []);
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -180,7 +181,7 @@ export default function MyReportsScreen() {
                     className="text-base font-bold"
                     style={{ color: colors.primary }}
                   >
-                    {item.targetUser.name.charAt(0).toUpperCase()}
+                    {item?.targetUser?.name.charAt(0).toUpperCase()}
                   </Text>
                 </View>
 
@@ -190,7 +191,7 @@ export default function MyReportsScreen() {
                     className="text-sm font-semibold"
                     style={{ color: colors.text }}
                   >
-                    {item.targetUser.name}
+                    {item?.targetUser?.name}
                   </Text>
                   <Text className="text-xs mt-0.5" style={{ color: "#6b9e8f" }}>
                     {date}

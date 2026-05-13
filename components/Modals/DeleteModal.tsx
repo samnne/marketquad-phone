@@ -1,5 +1,11 @@
 import { BASE_URL } from "@/constants/constants";
-import { useConvos, useListings, useMessage, useType, useUser } from "@/store/zustand";
+import {
+  useConvos,
+  useListings,
+  useMessage,
+  useType,
+  useUser,
+} from "@/store/zustand";
 import { supabase } from "@/supabase/authHelper";
 import { cleanUP } from "@/utils/functions";
 import { User } from "@supabase/supabase-js";
@@ -14,10 +20,15 @@ const DeleteModal = ({
 }: {
   deleteUser: boolean;
   setDeleteUser: Function;
-  session: User | null;
+  session:
+    | (ProfileData &
+        User & {
+          app_user: PublicUser & ProfileData;
+        })
+    | null;
 }) => {
   const { reset: lisReset } = useListings();
-  const {changeType} = useType()
+  const { changeType } = useType();
   const { reset: userReset } = useUser();
   const { reset: convoReset } = useConvos();
   const { setError, setMessage } = useMessage();
@@ -26,32 +37,32 @@ const DeleteModal = ({
 
   useEffect(() => {
     const canEvenDelete = async () => {
-      if(!session){
-        return
+      if (!session) {
+        return;
       }
       try {
         const response = await fetch(`${BASE_URL}/api/auth`, {
           headers: {
-            Authorization: session.id,
+            Authorization: session.id ?? session.app_user.uid,
           },
         });
-        
+
         const data = await response.json();
-      
+  
         const reports = data.reports;
-        
+
         const notResolved = reports?.filter(
-          (report: {status: string}) => report?.status !== "RESOLVED",
+          (report: { status: string }) => report?.status !== "RESOLVED",
         );
         if (notResolved?.length === 0) {
           setCantDelete(false);
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
     };
     canEvenDelete();
-  }, []);
+  }, [session]);
   function closeModal() {
     setDeleteUser(false);
   }
@@ -68,7 +79,7 @@ const DeleteModal = ({
         });
         const data = await response.json();
         const success = data.success;
-        
+
         if (!success) {
           setError(true);
           setMessage(
@@ -86,14 +97,14 @@ const DeleteModal = ({
           { reset: convoReset },
         );
         setDeleteUser(false);
-        changeType("sign-up")
+        changeType("sign-up");
         router.replace("/(auth)/sign-in");
       } catch (err) {
         setError(true);
         setMessage(
           "Error deleting account,\nplease contact us at \ncontact@market-quad.com!",
         );
-        console.error(err)
+        console.error(err);
       }
     }
   }

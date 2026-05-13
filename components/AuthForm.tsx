@@ -152,10 +152,9 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
   });
 
   useEffect(() => {
- 
     const mountSession = async () => {
       const { user, app_user } = await getUserSupabase();
-      if (user) {
+      if (user ) {
         setUser({ ...user, app_user });
         router.replace("/home");
       }
@@ -179,7 +178,8 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: formData.email,
-        options: { shouldCreateUser: val, data: { name: formData.name } },
+
+        options: { shouldCreateUser: val },
       });
       if (error) {
         setError(true);
@@ -211,6 +211,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
         setMessage("User doesn't match our records.");
         return;
       }
+
       if (userData?.isVerified) {
         const { error, data } = await supabase.auth.signInWithPassword({
           email: formData.email,
@@ -224,7 +225,7 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
         if (userData?.onboarding_completed) {
           return router.replace("/home");
         }
-        setUser({ user: data.user, app_user: { ...userData } });
+        setUser({ ...data.user, app_user: { ...userData } });
         return router.replace("/onboarding/guidelines");
       }
       await sendOTP();
@@ -259,9 +260,22 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
         );
         return;
       }
-      await sendOTP(true);
-      setCounter(60);
-      changeType("otp");
+      const {data, error} = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (error){
+        setError(true)
+        
+        setMessage(error.message)
+      }
+
+      if (data){
+        
+        await sendOTP();
+        setCounter(60);
+        changeType("otp");
+      }
     } catch (err) {
       console.error(err);
       setError(true);
@@ -289,33 +303,37 @@ const AuthForm = ({ type }: { type: "sign-in" | "sign-up" | "otp" }) => {
       const {
         data: { user: supabaseUser },
         error,
-      } = await supabase.auth.verifyOtp({ email, token: otp, type: "email" });
+      } = await supabase.auth.verifyOtp({ email, token: otp, type:"email" });
       if (error || !supabaseUser) {
         setError(true);
         setMessage("No User");
         return;
       }
+     
       const res = await fetch(`${BASE_URL}/api/auth/login`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+    
         body: JSON.stringify({ uid: supabaseUser.id, email, name }),
       }).then((r) => r.json());
+   
       if (!res.success) {
         setError(true);
         setMessage("Verification failed. Please try again.");
         return;
       }
+      
       setUser({ ...supabaseUser, app_user: res.app_user });
       setSuccess(true);
       setMessage("Verification successful!");
       if (loggingIn) {
         router.replace("/onboarding/guidelines");
       } else {
-        router.push("/onboarding/guidelines");
+        router.replace("/onboarding/guidelines");
       }
     } catch (err) {
       console.error(err);
       setError(true);
+      console.log("HMMM")
       setMessage("Invalid OTP. Please try again.");
     } finally {
       setLoadingOtp(false);

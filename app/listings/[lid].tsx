@@ -249,7 +249,6 @@ export default function ListingPage() {
     );
   }
 
-
   const isSeller = listing?.sellerId === user?.id;
   const existingConvo = (listing?.conversations ?? []).find(
     (c: any) => c.buyerId === user?.id,
@@ -257,6 +256,7 @@ export default function ListingPage() {
   const safeImages = (listing.imageUrls ?? []).filter(
     (url: any) => typeof url === "string" && url.startsWith("http"),
   );
+
 
   return (
     <View className="flex-1 bg-white" style={{}}>
@@ -644,7 +644,15 @@ export default function ListingPage() {
             )}
           </View>
         )}
-    
+        {reportModal && (
+          <ReportUserSheet
+            bottomSheetRef={ref}
+            onClose={() => setReportModal(false)}
+            targetName={listing?.seller?.name}
+            targetUserId={listing?.sellerId}
+            itemReported={{ id: listing?.lid, item: "LISTING" }}
+          />
+        )}
       </KeyboardAvoidingView>
     </View>
   );

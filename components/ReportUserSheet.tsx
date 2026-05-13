@@ -26,7 +26,7 @@ interface Props {
   targetName: string;
   bottomSheetRef: React.RefObject<BottomSheet> | null;
   onClose: () => void;
-  itemReported?: { item: string; id: string } | null | undefined;
+  itemReported?: { item: "LISTING" | "USER"; id: string } | null | undefined;
 }
 
 export function ReportUserSheet({
@@ -60,7 +60,7 @@ export function ReportUserSheet({
           method: "POST",
 
           headers: {
-            Authorization: user.id!,
+            Authorization: user?.app_user?.uid! ?? user?.id,
           },
           body: JSON.stringify({
             targetUserId,
@@ -70,7 +70,7 @@ export function ReportUserSheet({
           }),
         },
       );
-
+      
       if (res.status === 409) {
         Alert.alert(
           "Already Reported",
@@ -80,6 +80,7 @@ export function ReportUserSheet({
       }
 
       if (!res.ok) {
+
         setMessage("Failed to submit, something went wrong.");
         setError(true);
         return;
